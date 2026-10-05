@@ -1,0 +1,1639 @@
+<title>Eins nach dem Anderen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: eine schmale Spalte wie ein einzelnes System-Fenster, pro Ansicht genau eine Hauptaktion, Tab-Leiste unten (Daumen-Reichweite) */
+:root {
+  --void: #050b1c;
+  --panel: #0a1736;
+  --panel-2: #0e2149;
+  --panel-3: #143066;
+  --line: #4fd8ff;
+  --line-dim: #2b6c9c;
+  --ink: #ecf8ff;
+  --ink-dim: #9ec4e2;
+  --ink-faint: #6f93b3;
+  --danger: #ff7a98;
+  --gold: #ffd57e;
+  --glow-strong: rgba(79, 216, 255, .7);
+  --glow-soft: rgba(79, 216, 255, .3);
+  --glow-faint: rgba(79, 216, 255, .12);
+  --text-glow: 0 0 6px rgba(140, 225, 255, .7), 0 0 14px rgba(79, 216, 255, .35);
+
+  --f-display: "Cinzel", "Trajan Pro", "Times New Roman", Georgia, serif;
+  --f-body: "Crimson Pro", Georgia, "Times New Roman", serif;
+
+  --fs-xs: .8rem;
+  --fs-s: .95rem;
+  --fs-m: 1.1rem;
+  --fs-l: 1.4rem;
+  --fs-xl: 2rem;
+  --fs-xxl: clamp(2rem, 8vw, 2.7rem);
+
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100%;
+  padding-inline: 16px;
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 1.125rem;
+  line-height: 1.45;
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(46, 104, 196, .34), transparent 62%),
+    radial-gradient(70% 45% at 100% 100%, rgba(30, 70, 150, .2), transparent 70%),
+    var(--void);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+p, h1, h2, h3, ul, ol { margin: 0; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.app {
+  max-width: 36rem;
+  margin-inline: auto;
+  padding-block: 20px calc(110px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ---------- Kopfzeile ---------- */
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; }
+.top-l { display: grid; gap: 2px; min-width: 0; }
+.eyebrow {
+  font-family: var(--f-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.brand {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: var(--fs-l);
+  letter-spacing: .12em;
+  line-height: 1.15;
+  text-shadow: var(--text-glow);
+}
+.sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-s);
+  color: var(--ink-faint);
+}
+.sync::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: var(--ink-faint);
+}
+.sync[data-s="cloud"]::before { background: var(--line); box-shadow: 0 0 6px var(--line); }
+.sync[data-s="saving"]::before { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+
+/* ---------- Grundbausteine ---------- */
+.stack { display: flex; flex-direction: column; gap: 22px; }
+.block { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.view-head { display: grid; gap: 6px; }
+.h-view {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: var(--fs-xl);
+  letter-spacing: .08em;
+  line-height: 1.15;
+  text-shadow: var(--text-glow);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.h-sec {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: var(--fs-m);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.sub { color: var(--ink-dim); max-width: 46ch; }
+.hint { color: var(--ink-faint); font-size: var(--fs-s); }
+.lbl {
+  font-family: var(--f-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.panel {
+  position: relative;
+  background: linear-gradient(180deg, rgba(16, 36, 80, .94), rgba(7, 17, 40, .96));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 0 10px var(--glow-soft), 0 0 28px var(--glow-faint), inset 0 0 20px var(--glow-faint);
+  padding: 22px 18px 20px;
+}
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(43, 108, 156, .55);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.panel > * { position: relative; z-index: 1; }
+.corners::before {
+  --c: var(--line);
+  --l: 18px;
+  --t: 3px;
+  content: "";
+  position: absolute;
+  inset: -3px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--c) 0 0) left top / var(--l) var(--t),
+    linear-gradient(var(--c) 0 0) left top / var(--t) var(--l),
+    linear-gradient(var(--c) 0 0) right top / var(--l) var(--t),
+    linear-gradient(var(--c) 0 0) right top / var(--t) var(--l),
+    linear-gradient(var(--c) 0 0) left bottom / var(--l) var(--t),
+    linear-gradient(var(--c) 0 0) left bottom / var(--t) var(--l),
+    linear-gradient(var(--c) 0 0) right bottom / var(--l) var(--t),
+    linear-gradient(var(--c) 0 0) right bottom / var(--t) var(--l);
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 4px var(--line));
+}
+
+mark {
+  background: none;
+  color: var(--ink);
+  text-shadow: var(--text-glow);
+  border-bottom: 2px solid var(--line);
+  box-shadow: 0 6px 10px -8px var(--line);
+  padding-bottom: 1px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 18px;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: var(--fs-s);
+  letter-spacing: .08em;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  box-shadow: 0 0 8px var(--glow-soft), inset 0 0 0 3px var(--panel-2), inset 0 0 0 4px var(--glow-faint);
+  transition: box-shadow .15s ease, background-color .15s ease, transform .08s ease;
+}
+.btn:hover { background: var(--panel-3); box-shadow: 0 0 14px var(--glow-strong), inset 0 0 0 3px var(--panel-3), inset 0 0 0 4px var(--glow-soft); }
+.btn:active { transform: scale(.98); }
+.btn .ico { width: 18px; height: 18px; }
+.btn-solid {
+  background: var(--line);
+  color: var(--void);
+  border-color: var(--line);
+  box-shadow: 0 0 16px var(--glow-strong);
+}
+.btn-solid:hover { background: #8be6ff; box-shadow: 0 0 22px var(--glow-strong); }
+.btn-solid .ico { filter: none; }
+.btn-big { min-height: 58px; font-size: var(--fs-m); letter-spacing: .12em; }
+.btn-sm { min-height: 38px; padding: 6px 14px; font-size: var(--fs-xs); }
+.btn-quiet { background: transparent; border-color: var(--line-dim); box-shadow: none; color: var(--ink-dim); }
+.btn-quiet:hover { color: var(--ink); background: var(--glow-faint); box-shadow: none; }
+.btn-danger { border-color: var(--danger); color: var(--danger); background: transparent; box-shadow: none; }
+.btn-danger:hover { background: rgba(255, 122, 152, .12); box-shadow: none; }
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ink-dim);
+}
+.icon-btn:hover { border-color: var(--line-dim); color: var(--ink); background: var(--glow-faint); }
+.icon-btn:disabled { opacity: .25; cursor: default; background: transparent; border-color: transparent; }
+.icon-btn .ico { width: 20px; height: 20px; }
+.link {
+  align-self: flex-start;
+  padding: 4px 0;
+  background: none;
+  border: 0;
+  color: var(--ink-dim);
+  font-size: var(--fs-s);
+  text-decoration: underline;
+  text-decoration-color: var(--line-dim);
+  text-underline-offset: 4px;
+}
+.link:hover { color: var(--ink); text-decoration-color: var(--line); }
+.ico { width: 22px; height: 22px; flex: none; }
+
+/* ---------- Eingaben ---------- */
+.field { display: flex; flex-wrap: wrap; gap: 8px; }
+.field > .input { flex: 1 1 180px; }
+.input {
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 14px;
+  background: rgba(5, 11, 28, .65);
+  border: 1px solid var(--line-dim);
+  border-radius: 4px;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.input::placeholder { color: var(--ink-faint); opacity: 1; }
+.input:focus { outline: none; border-color: var(--line); box-shadow: 0 0 10px var(--glow-soft); }
+textarea.input { resize: none; overflow: hidden; display: block; }
+
+/* ---------- Jetzt ---------- */
+.focus { display: flex; flex-direction: column; gap: 20px; }
+.focus-head { display: grid; gap: 8px; }
+.now-title { font-size: var(--fs-xxl); letter-spacing: .06em; }
+.savepoint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 213, 126, .07);
+  border: 1px solid rgba(255, 213, 126, .45);
+  border-radius: 4px;
+}
+.savepoint .lbl { color: var(--gold); }
+.savepoint-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.next {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line-dim);
+}
+.step-big { font-size: var(--fs-l); line-height: 1.35; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.actions .btn-big { flex: 1 1 200px; }
+.park {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(255, 213, 126, .45);
+  border-radius: 4px;
+  background: rgba(255, 213, 126, .05);
+}
+.park .lbl { color: var(--gold); }
+
+/* Timer (60-Minuten-Scheibe) */
+.timer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px 20px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line-dim);
+}
+.dial { width: 150px; height: 150px; max-width: 100%; }
+.dial svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.dial .face { fill: var(--panel); stroke: var(--line-dim); stroke-width: 1; }
+.dial .wedge { fill: var(--line); fill-opacity: .82; filter: drop-shadow(0 0 4px var(--line)); }
+.dial.low .wedge { fill: var(--danger); filter: drop-shadow(0 0 4px var(--danger)); }
+.dial .tick { stroke: var(--ink-dim); stroke-width: 1.2; stroke-linecap: round; }
+.dial .tick.major { stroke: var(--ink); stroke-width: 1.8; }
+.dial .hub { fill: var(--void); stroke: var(--line); stroke-width: 1.2; }
+.dial .num { fill: var(--ink-dim); font-family: var(--f-display); font-size: 7.5px; font-weight: 600; }
+.t-side { display: grid; gap: 10px; min-width: 0; }
+.t-read {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 2.3rem;
+  line-height: 1;
+  letter-spacing: .06em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: var(--text-glow);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  min-height: 36px;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--line-dim);
+  border-radius: 3px;
+  color: var(--ink-dim);
+  font-family: var(--f-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .06em;
+  font-variant-numeric: tabular-nums;
+}
+.chip:hover { color: var(--ink); border-color: var(--line); }
+.chip[aria-pressed="true"] { color: var(--void); background: var(--ink-dim); border-color: var(--ink-dim); }
+@media (max-width: 440px) {
+  .timer { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+  .t-side { justify-items: center; }
+  .chips { justify-content: center; }
+}
+
+/* Abschluss-Meldung */
+.win {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+  justify-items: center;
+  padding-block: 22px;
+}
+.win-title {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: var(--fs-l);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-shadow: var(--text-glow);
+  animation: flicker 1.2s ease-out 1;
+}
+.win-task { font-size: var(--fs-m); overflow-wrap: anywhere; }
+.win-msg { color: var(--ink-dim); }
+.diamond {
+  width: 16px;
+  height: 16px;
+  transform: rotate(45deg);
+  background: var(--line);
+  box-shadow: 0 0 12px var(--line);
+  margin-bottom: 6px;
+}
+.tally { color: var(--ink-dim); font-size: var(--fs-s); }
+.tally strong { font-family: var(--f-display); color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------- Schritte / Häkchen ---------- */
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; }
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(43, 108, 156, .45);
+}
+.step:last-child { border-bottom: 0; }
+.step-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.step.is-done .step-text { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line-dim); }
+.check {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.check .box {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  transform: rotate(45deg);
+  box-shadow: 0 0 6px var(--glow-soft);
+  transition: background-color .15s ease;
+}
+.check .box .ico { width: 13px; height: 13px; transform: rotate(-45deg); opacity: 0; color: var(--void); }
+.check:hover .box { box-shadow: 0 0 10px var(--glow-strong); }
+.check[aria-checked="true"] .box { background: var(--line); }
+.check[aria-checked="true"] .box .ico { opacity: 1; }
+
+/* ---------- Heute: drei Plätze ---------- */
+.slots { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.slot {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: start;
+  padding: 14px 10px 14px 12px;
+  background: rgba(14, 33, 73, .8);
+  border: 1px solid var(--line-dim);
+  border-radius: 5px;
+}
+.slot.is-first { border-color: var(--line); box-shadow: 0 0 10px var(--glow-soft), inset 0 0 0 3px rgba(14, 33, 73, .8), inset 0 0 0 4px var(--glow-faint); }
+.slot-num {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 1.7rem;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--ink-faint);
+}
+.slot.is-first .slot-num { color: var(--ink); text-shadow: var(--text-glow); }
+.slot-body { min-width: 0; display: grid; gap: 6px; }
+.slot-title {
+  justify-self: start;
+  max-width: 100%;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: var(--fs-m);
+  letter-spacing: .04em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.slot-title:hover { text-shadow: var(--text-glow); }
+.slot-actions { display: flex; }
+.slot-foot { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 8px; padding-top: 6px; }
+.slot-more {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 14px;
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line-dim);
+}
+.slot-empty { background: transparent; border-style: dashed; }
+.slot-empty .slot-body { grid-column: 2 / -1; }
+.free { color: var(--ink-faint); font-style: italic; padding-top: 4px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  display: inline-block;
+  max-width: 100%;
+  padding: 1px 9px;
+  border: 1px solid var(--line-dim);
+  border-radius: 3px;
+  font-size: var(--fs-s);
+  color: var(--ink-dim);
+  overflow-wrap: anywhere;
+}
+.pill-live { border-color: var(--line); color: var(--ink); box-shadow: 0 0 6px var(--glow-soft); }
+.pill-save { border-color: rgba(255, 213, 126, .5); color: var(--gold); }
+
+/* ---------- Erledigt-Liste ---------- */
+.done-list { list-style: none; padding: 0; display: flex; flex-direction: column; }
+.done-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(43, 108, 156, .45);
+}
+.done-list li:last-child { border-bottom: 0; }
+.done-list .d {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg) translateY(-2px);
+  background: var(--line);
+  box-shadow: 0 0 5px var(--line);
+}
+.done-list .t { overflow-wrap: anywhere; color: var(--ink-dim); }
+.done-list time { font-family: var(--f-display); font-size: var(--fs-xs); color: var(--ink-faint); font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+.count {
+  font-family: var(--f-display);
+  font-size: var(--fs-s);
+  color: var(--void);
+  background: var(--line);
+  padding: 0 8px;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Routinen ---------- */
+.routine { display: flex; flex-direction: column; gap: 14px; }
+.r-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.r-name {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: var(--fs-l);
+  letter-spacing: .08em;
+  text-shadow: var(--text-glow);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.r-count { font-family: var(--f-display); font-weight: 600; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.segs { display: flex; gap: 4px; }
+.seg { flex: 1; height: 6px; background: var(--panel-3); border-radius: 1px; }
+.seg.on { background: var(--line); box-shadow: 0 0 6px var(--line); }
+.r-next { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.r-done { font-family: var(--f-display); letter-spacing: .12em; text-transform: uppercase; text-shadow: var(--text-glow); }
+
+/* ---------- Kopf leeren ---------- */
+.dump-list { list-style: none; padding: 0; display: flex; flex-direction: column; }
+.dump-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(43, 108, 156, .45);
+}
+.dump-item:last-child { border-bottom: 0; }
+.dump-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.empty {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 20px 16px;
+  border: 1px dashed var(--line-dim);
+  border-radius: 5px;
+  color: var(--ink-dim);
+}
+.empty strong { font-family: var(--f-display); font-weight: 600; letter-spacing: .08em; color: var(--ink); }
+
+/* ---------- Tab-Leiste ---------- */
+.tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: rgba(7, 17, 40, .96);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -4px 18px var(--glow-faint);
+}
+.tabs-in { max-width: 36rem; margin-inline: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.tab {
+  position: relative;
+  min-height: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--ink-faint);
+  font-family: var(--f-display);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+.tab .ico { width: 22px; height: 22px; }
+.tab:hover { color: var(--ink-dim); }
+.tab[aria-current="page"] { color: var(--ink); border-color: var(--line-dim); background: var(--glow-faint); text-shadow: var(--text-glow); }
+.tab[aria-current="page"] .ico { filter: drop-shadow(0 0 3px var(--glow-strong)); }
+.badge {
+  position: absolute;
+  top: 3px;
+  left: calc(50% + 8px);
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  background: var(--line);
+  color: var(--void);
+  font-family: var(--f-display);
+  font-size: .66rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: none;
+}
+.badge.live { min-width: 9px; width: 9px; height: 9px; padding: 0; top: 7px; transform: rotate(45deg); box-shadow: 0 0 6px var(--line); border-radius: 1px; }
+
+/* ---------- Meldung ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  box-shadow: 0 0 14px var(--glow-soft);
+  font-size: var(--fs-s);
+}
+.toast button { flex: none; padding: 4px 0; background: none; border: 0; color: var(--line); font-family: var(--f-display); font-size: var(--fs-xs); letter-spacing: .1em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 4px; }
+
+/* Abschluss-Partikel */
+.burst { position: fixed; left: 50%; top: 40%; width: 0; height: 0; pointer-events: none; z-index: 30; }
+.burst i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  animation: burst 1.25s cubic-bezier(.2, .7, .3, 1) forwards;
+}
+@keyframes burst {
+  0% { transform: translate(0, 0) rotate(45deg) scale(.4); opacity: 1; }
+  45% { transform: translate(calc(var(--x) * .75), var(--y)) rotate(var(--r)) scale(1); opacity: 1; }
+  100% { transform: translate(var(--x), calc(var(--y) + 200px)) rotate(var(--r)) scale(.6); opacity: 0; }
+}
+@keyframes flicker {
+  0% { opacity: 0; }
+  12% { opacity: .9; }
+  18% { opacity: .3; }
+  30% { opacity: 1; }
+  40% { opacity: .55; }
+  55%, 100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="top-l">
+      <span class="eyebrow" id="date">Heute</span>
+      <h1 class="brand">Eins nach dem Anderen</h1>
+    </div>
+    <span class="sync" id="sync" data-s="local">Verbinde …</span>
+  </header>
+  <main id="view"></main>
+</div>
+
+<nav class="tabs" aria-label="Bereiche">
+  <div class="tabs-in">
+    <button class="tab" type="button" data-a="tab" data-tab="jetzt"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg><span>Jetzt</span><b class="badge" hidden></b></button>
+    <button class="tab" type="button" data-a="tab" data-tab="heute"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 7.5 5.5 6v4.5M4.2 15.5c.4-.6 2-.8 2 .4 0 .9-2 1.4-2 2.6h2.2"/></svg><span>Heute</span><b class="badge" hidden></b></button>
+    <button class="tab" type="button" data-a="tab" data-tab="routinen"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 11a7.5 7.5 0 0 1 13.2-4.6L19.5 8"/><path d="M19.5 3.5V8H15"/><path d="M19.5 13a7.5 7.5 0 0 1-13.2 4.6L4.5 16"/><path d="M4.5 20.5V16H9"/></svg><span>Routinen</span><b class="badge" hidden></b></button>
+    <button class="tab" type="button" data-a="tab" data-tab="kopf"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 13.5 6 5h12l2.5 8.5V19H3.5z"/><path d="M3.5 13.5h5l1.3 2.3h4.4l1.3-2.3h5"/></svg><span>Kopf leeren</span><b class="badge" hidden></b></button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- Hilfen ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = n => String(n).padStart(2, '0');
+  const dayKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const today = () => dayKey(new Date());
+  const newId = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+  const okId = x => (typeof x === 'string' && /^[\w-]{1,40}$/.test(x)) ? x : newId();
+  const str = (x, n) => (typeof x === 'string' ? x.slice(0, n) : '');
+  const hhmm = ts => new Date(ts).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const MAX = 3;
+  const reducedMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+
+  const SVG = p => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const ICON = {
+    check: SVG('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+    x: SVG('<path d="M6 6l12 12M18 6 6 18"/>'),
+    up: SVG('<path d="M12 19V5M6 11l6-6 6 6"/>'),
+    down: SVG('<path d="M12 5v14M6 13l6 6 6-6"/>'),
+    play: SVG('<path d="M8 5.5v13l10-6.5z"/>'),
+    save: SVG('<path d="M12 3l7 9-7 9-7-9z"/>')
+  };
+
+  const WINS = [
+    'Angefangen und fertig gemacht. Genau darum geht es.',
+    'Ein Haken mehr. Kurz durchatmen, dann weiter.',
+    'Du hast es durchgezogen.',
+    'Erledigt ist erledigt. Stark.'
+  ];
+
+  /* ---------- Daten ---------- */
+  const blank = () => ({ v: 1, updatedAt: 0, activeId: null, tasks: [], routines: [], done: [] });
+
+  function normalize(d) {
+    const s = blank();
+    if (!d || typeof d !== 'object') return s;
+    s.updatedAt = Number(d.updatedAt) || 0;
+    const steps = a => Array.isArray(a)
+      ? a.filter(x => x && typeof x.t === 'string' && x.t.trim()).slice(0, 60)
+          .map(x => ({ id: okId(x.id), t: x.t.slice(0, 200), done: !!x.done }))
+      : [];
+    if (Array.isArray(d.tasks)) {
+      s.tasks = d.tasks.filter(t => t && typeof t.title === 'string' && t.title.trim()).slice(0, 400).map(t => ({
+        id: okId(t.id),
+        title: t.title.slice(0, 200),
+        where: t.where === 'heute' ? 'heute' : 'inbox',
+        steps: steps(t.steps),
+        note: str(t.note, 300),
+        createdAt: Number(t.createdAt) || Date.now()
+      }));
+    }
+    let n = 0;
+    s.tasks.forEach(t => { if (t.where === 'heute' && ++n > MAX) t.where = 'inbox'; });
+    s.activeId = s.tasks.some(t => t.id === d.activeId && t.where === 'heute') ? d.activeId : null;
+    if (Array.isArray(d.routines)) {
+      s.routines = d.routines.filter(r => r && typeof r.name === 'string' && r.name.trim()).slice(0, 20).map(r => ({
+        id: okId(r.id),
+        name: r.name.slice(0, 60),
+        steps: steps(r.steps).map(({ id, t }) => ({ id, t })),
+        day: str(r.day, 10),
+        doneIds: Array.isArray(r.doneIds) ? r.doneIds.filter(x => typeof x === 'string').slice(0, 60) : []
+      }));
+    }
+    if (Array.isArray(d.done)) {
+      s.done = d.done.filter(x => x && typeof x.title === 'string').slice(-100)
+        .map(x => ({ title: x.title.slice(0, 200), at: Number(x.at) || 0 }));
+    }
+    return s;
+  }
+
+  let S = blank();
+  const ui = { tab: 'jetzt', open: null, parking: false, editR: null, win: null };
+
+  const heute = () => S.tasks.filter(t => t.where === 'heute');
+  const inbox = () => S.tasks.filter(t => t.where === 'inbox');
+  const byId = id => S.tasks.find(t => t.id === id);
+  const active = () => (S.activeId ? byId(S.activeId) : null);
+  const doneToday = () => S.done.filter(x => dayKey(new Date(x.at)) === today());
+  const rDone = r => (r.day === today() ? r.doneIds : []);
+  const hasContent = s => s.tasks.length || s.routines.length || s.done.length;
+
+  /* ---------- Speichern: Konto (db) mit Gerät als Rückfall ---------- */
+  const LS = 'eins-nach-dem-anderen.v1';
+  let ref = null, writing = false, again = false, wTimer = null, syncState = 'connecting', retries = 0;
+
+  function loadLocal() {
+    try { const raw = localStorage.getItem(LS); return raw ? normalize(JSON.parse(raw)) : null; } catch (e) { return null; }
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) { /* nur Komfort */ }
+  }
+  function setSync(s) { syncState = s; paintSync(); }
+  function paintSync() {
+    const el = $('#sync');
+    const txt = { cloud: 'Gespeichert', saving: 'Speichert …', local: 'Nur auf diesem Gerät', connecting: 'Verbinde …' };
+    el.dataset.s = syncState;
+    el.textContent = txt[syncState] || '';
+  }
+
+  function commit() {
+    S.updatedAt = Date.now();
+    if (S.done.length > 100) S.done = S.done.slice(-100);
+    saveLocal();
+    render();
+    queueRemote();
+  }
+  function queueRemote() {
+    if (!ref) return;
+    clearTimeout(wTimer);
+    setSync('saving');
+    wTimer = setTimeout(flush, 500);
+  }
+  async function flush() {
+    wTimer = null;
+    if (!ref) return;
+    if (writing) { again = true; return; }
+    writing = true;
+    try {
+      await ref.set(JSON.parse(JSON.stringify(S)));
+      retries = 0;
+      setSync('cloud');
+    } catch (e) {
+      writeFailed(e);
+    } finally {
+      writing = false;
+      if (again) { again = false; flush(); }
+    }
+  }
+  function writeFailed(e) {
+    const code = e && e.code;
+    if ((code === 'unavailable' || code === 'resource_exhausted') && retries < 3) {
+      retries++;
+      setTimeout(queueRemote, 1500 * retries + Math.random() * 1000);
+      return;
+    }
+    if (code === 'quota_exceeded') {
+      setSync('local');
+      toast('Der Speicher ist voll. Lösch ein paar alte Einträge, dann klappt es wieder.');
+      return;
+    }
+    ref = null;
+    setSync('local');
+    toast('Im Konto speichern klappt gerade nicht. Deine Sachen bleiben auf diesem Gerät.');
+  }
+
+  async function connect() {
+    if (!window.claude || typeof window.claude.use !== 'function') { setSync('local'); return; }
+    let db = null, user = null;
+    try { [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]); } catch (e) { /* ohne Konto */ }
+    if (!db || !user) { setSync('local'); return; }
+    const uid = await user.id();
+    if (!uid) { setSync('local'); return; }
+    try { ref = db.doc('data/users/' + uid + '/planer'); } catch (e) { ref = null; setSync('local'); return; }
+    ref.onSnapshot(snap => {
+      if (!snap.exists) {
+        if (hasContent(S)) queueRemote(); else setSync('cloud');
+        return;
+      }
+      if (snap.metadata.hasPendingWrites || wTimer || writing) return;
+      const remote = normalize(snap.data());
+      if (remote.updatedAt > S.updatedAt) {
+        S = remote;
+        saveLocal();
+        render();
+      } else if (remote.updatedAt < S.updatedAt) {
+        queueRemote();
+        return;
+      }
+      setSync('cloud');
+    }, () => { ref = null; setSync('local'); });
+  }
+
+  /* ---------- Aktionen ---------- */
+  let undoSnap = null;
+  const snapshot = () => { undoSnap = JSON.stringify(S); };
+  function undo() {
+    if (!undoSnap) return;
+    S = normalize(JSON.parse(undoSnap));
+    undoSnap = null;
+    $('#toast').hidden = true;
+    commit();
+  }
+
+  const lines = v => v.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+  const mkTask = (title, where) => ({ id: newId(), title: title.slice(0, 200), where, steps: [], note: '', createdAt: Date.now() });
+
+  function addTasks(text, where) {
+    const ls = lines(text);
+    if (!ls.length) return;
+    let added = 0, overflow = 0;
+    for (const l of ls) {
+      if (where === 'heute' && heute().length >= MAX) { S.tasks.push(mkTask(l, 'inbox')); overflow++; continue; }
+      S.tasks.push(mkTask(l, where));
+      added++;
+    }
+    commit();
+    if (overflow) toast(`Heute ist voll. ${overflow === 1 ? 'Eine Sache liegt' : overflow + ' Sachen liegen'} in „Kopf leeren“.`);
+    else if (where === 'inbox' && ui.tab !== 'kopf') toast('Notiert. Liegt in „Kopf leeren“.');
+    else if (where === 'inbox' && added > 1) toast(`${added} Einträge notiert.`);
+  }
+
+  function toHeute(id) {
+    const t = byId(id);
+    if (!t) return;
+    if (heute().length >= MAX) { toast('Heute ist voll (3 von 3). Mach erst eine Sache fertig.'); return; }
+    S.tasks = S.tasks.filter(x => x !== t);
+    t.where = 'heute';
+    S.tasks.push(t);
+    commit();
+    toast(`Auf Platz ${heute().length} für heute.`);
+  }
+  function toInbox(id) {
+    const t = byId(id);
+    if (!t) return;
+    if (S.activeId === id) S.activeId = null;
+    t.where = 'inbox';
+    ui.open = null;
+    commit();
+    toast('Zurück in „Kopf leeren“.');
+  }
+  function delTask(id) {
+    const t = byId(id);
+    if (!t) return;
+    snapshot();
+    S.tasks = S.tasks.filter(x => x !== t);
+    if (S.activeId === id) S.activeId = null;
+    ui.open = null;
+    commit();
+    toast('Gelöscht.', true);
+  }
+  function move(id, dir) {
+    const h = heute();
+    const i = h.findIndex(t => t.id === id), j = i + dir;
+    if (i < 0 || j < 0 || j >= h.length) return;
+    const a = S.tasks.indexOf(h[i]), b = S.tasks.indexOf(h[j]);
+    [S.tasks[a], S.tasks[b]] = [S.tasks[b], S.tasks[a]];
+    commit();
+  }
+  function start(id, mins) {
+    const cur = active();
+    if (cur && cur.id !== id) { toast(`Erst „${cur.title}“ fertig machen oder parken.`); return; }
+    if (!byId(id)) return;
+    S.activeId = id;
+    ui.tab = 'jetzt';
+    ui.win = null;
+    ui.parking = false;
+    if (mins) { tSet(mins); tStart(); }
+    commit();
+    window.scrollTo(0, 0);
+  }
+  function complete(t) {
+    S.done.push({ title: t.title, at: Date.now() });
+    S.tasks = S.tasks.filter(x => x !== t);
+    if (S.activeId === t.id) S.activeId = null;
+    ui.win = { title: t.title, msg: WINS[Math.floor(Math.random() * WINS.length)] };
+    ui.parking = false;
+    ui.open = null;
+  }
+  function finish() {
+    const t = active();
+    if (!t) return;
+    complete(t);
+    tReset();
+    ui.tab = 'jetzt';
+    commit();
+    window.scrollTo(0, 0);
+    burst();
+  }
+  function doneDirect(id) {
+    const t = byId(id);
+    if (!t) return;
+    complete(t);
+    ui.win = null;
+    commit();
+    toast(`Erledigt: ${t.title}`);
+    burst();
+  }
+  function park(note) {
+    const t = active();
+    if (!t) return;
+    t.note = note.slice(0, 300);
+    S.activeId = null;
+    ui.parking = false;
+    if (T.endsAt) tPause();
+    commit();
+    toast(t.note ? 'Speicherpunkt gesetzt. Deine Notiz wartet auf dich.' : 'Geparkt.');
+  }
+  function addSteps(id, text) {
+    const t = byId(id);
+    if (!t) return;
+    for (const l of lines(text)) t.steps.push({ id: newId(), t: l.slice(0, 200), done: false });
+    commit();
+  }
+  function toggleStep(id, sid) {
+    const s = byId(id)?.steps.find(x => x.id === sid);
+    if (!s) return;
+    s.done = !s.done;
+    commit();
+  }
+  function nextStepDone(id) {
+    const s = byId(id)?.steps.find(x => !x.done);
+    if (!s) return;
+    s.done = true;
+    commit();
+    const t = byId(id);
+    if (t && t.steps.every(x => x.done)) toast('Alle Schritte erledigt. Jetzt den großen Haken.');
+  }
+  function delStep(id, sid) {
+    const t = byId(id);
+    if (!t) return;
+    t.steps = t.steps.filter(x => x.id !== sid);
+    commit();
+  }
+  function rename(id, v) {
+    const t = byId(id);
+    if (!t || !v.trim()) return;
+    t.title = v.trim().slice(0, 200);
+    ui.open = null;
+    commit();
+  }
+  function clearNote(id) {
+    const t = byId(id);
+    if (!t) return;
+    t.note = '';
+    commit();
+  }
+
+  /* Routinen */
+  const rById = id => S.routines.find(r => r.id === id);
+  function templates() {
+    const mk = (name, steps) => ({ id: newId(), name, steps: steps.map(t => ({ id: newId(), t })), day: '', doneIds: [] });
+    S.routines.push(
+      mk('Morgens', ['Ein Glas Wasser trinken', 'Medikamente nehmen', 'Zähne putzen', 'Anziehen', 'Frühstücken', 'Schlüssel, Handy, Geldbeutel einpacken']),
+      mk('Abends', ['5 Minuten Küche klar machen', 'Sachen für morgen hinlegen', 'Handy ans Ladekabel', 'Zähne putzen', 'Die wichtigste Sache für morgen in „Kopf leeren“ notieren'])
+    );
+    commit();
+  }
+  function rToggle(id, sid) {
+    const r = rById(id);
+    if (!r) return;
+    if (r.day !== today()) { r.day = today(); r.doneIds = []; }
+    const had = r.doneIds.includes(sid);
+    r.doneIds = had ? r.doneIds.filter(x => x !== sid) : r.doneIds.concat(sid);
+    commit();
+    if (!had && r.steps.length && r.steps.every(s => r.doneIds.includes(s.id))) {
+      toast(`${r.name}: für heute geschafft.`);
+      burst();
+    }
+  }
+  function rReset(id) {
+    const r = rById(id);
+    if (!r) return;
+    r.doneIds = [];
+    commit();
+  }
+  function rAdd(name) {
+    const r = { id: newId(), name: name.slice(0, 60), steps: [], day: '', doneIds: [] };
+    S.routines.push(r);
+    ui.editR = r.id;
+    commit();
+  }
+  function rDel(id) {
+    snapshot();
+    S.routines = S.routines.filter(r => r.id !== id);
+    ui.editR = null;
+    commit();
+    toast('Routine gelöscht.', true);
+  }
+  function rAddStep(id, text) {
+    const r = rById(id);
+    if (!r) return;
+    for (const l of lines(text)) r.steps.push({ id: newId(), t: l.slice(0, 200) });
+    commit();
+  }
+  function rDelStep(id, sid) {
+    const r = rById(id);
+    if (!r) return;
+    r.steps = r.steps.filter(s => s.id !== sid);
+    r.doneIds = r.doneIds.filter(x => x !== sid);
+    commit();
+  }
+  function rRename(id, v) {
+    const r = rById(id);
+    if (!r || !v.trim()) return;
+    r.name = v.trim().slice(0, 60);
+    commit();
+  }
+  function rMove(id, dir) {
+    const i = S.routines.findIndex(r => r.id === id), j = i + dir;
+    if (i < 0 || j < 0 || j >= S.routines.length) return;
+    [S.routines[i], S.routines[j]] = [S.routines[j], S.routines[i]];
+    commit();
+  }
+
+  /* ---------- Timer (Zeitscheibe, 60 Minuten = voller Kreis) ---------- */
+  const TK = 'eins-nach-dem-anderen.timer';
+  let T = (() => {
+    try { const t = JSON.parse(localStorage.getItem(TK)); if (t && t.total > 0 && t.preset > 0) return t; } catch (e) { /* frisch */ }
+    return { preset: 15, total: 900000, left: 900000, endsAt: null };
+  })();
+  let tick = null, ac = null;
+  const saveT = () => { try { localStorage.setItem(TK, JSON.stringify(T)); } catch (e) { /* nur Komfort */ } };
+  const tLeft = () => (T.endsAt ? Math.max(0, T.endsAt - Date.now()) : T.left);
+  const fmt = ms => { const s = Math.ceil(ms / 1000); return `${Math.floor(s / 60)}:${pad(s % 60)}`; };
+
+  function tSet(min) { T = { preset: min, total: min * 60000, left: min * 60000, endsAt: null }; saveT(); stopTick(); }
+  function tReset() { tSet(T.preset || 15); }
+  function tStart() {
+    unlockAudio();
+    if (tLeft() <= 0) { T.left = T.total = T.preset * 60000; }
+    T.endsAt = Date.now() + T.left;
+    saveT();
+    startTick();
+  }
+  function tPause() { T.left = tLeft(); T.endsAt = null; saveT(); stopTick(); }
+  function tAdd5() {
+    if (T.endsAt) T.endsAt += 300000; else T.left += 300000;
+    T.total = Math.max(T.total, tLeft());
+    saveT();
+    if (T.endsAt) startTick();
+  }
+  function startTick() {
+    stopTick();
+    tick = setInterval(() => {
+      paintTimer();
+      if (T.endsAt && tLeft() <= 0) {
+        T.endsAt = null;
+        T.left = 0;
+        saveT();
+        stopTick();
+        ring();
+        render();
+      }
+    }, 250);
+  }
+  function stopTick() { if (tick) { clearInterval(tick); tick = null; } }
+  function unlockAudio() {
+    try {
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!ac && C) ac = new C();
+      if (ac && ac.state === 'suspended') ac.resume();
+    } catch (e) { /* ohne Ton */ }
+  }
+  function ring() {
+    try {
+      if (ac) {
+        const t0 = ac.currentTime;
+        [660, 784, 988].forEach((f, i) => {
+          const o = ac.createOscillator(), g = ac.createGain(), d = i * 0.32;
+          o.type = 'sine';
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.0001, t0 + d);
+          g.gain.exponentialRampToValueAtTime(0.22, t0 + d + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.3);
+          o.connect(g).connect(ac.destination);
+          o.start(t0 + d);
+          o.stop(t0 + d + 0.32);
+        });
+      }
+    } catch (e) { /* ohne Ton */ }
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) { /* ohne Vibration */ }
+    toast('Zeit ist um.');
+  }
+
+  function wedge(ms) {
+    const ang = Math.min(360, ms / 3600000 * 360), R = 44;
+    if (ang <= 0.05) return '';
+    if (ang >= 359.9) return `M0 ${-R}A${R} ${R} 0 1 1 0 ${R}A${R} ${R} 0 1 1 0 ${-R}Z`;
+    const a = ang * Math.PI / 180;
+    return `M0 0L0 ${-R}A${R} ${R} 0 ${ang > 180 ? 1 : 0} 1 ${(R * Math.sin(a)).toFixed(2)} ${(-R * Math.cos(a)).toFixed(2)}Z`;
+  }
+  function dialSVG(ms) {
+    let ticks = '';
+    for (let m = 0; m < 60; m += 5) {
+      const a = m * 6 * Math.PI / 180, major = m % 15 === 0, r1 = major ? 39 : 41.5, r2 = 45;
+      ticks += `<line class="tick${major ? ' major' : ''}" x1="${(Math.sin(a) * r1).toFixed(2)}" y1="${(-Math.cos(a) * r1).toFixed(2)}" x2="${(Math.sin(a) * r2).toFixed(2)}" y2="${(-Math.cos(a) * r2).toFixed(2)}"/>`;
+    }
+    const nums = [[0, '0'], [15, '15'], [30, '30'], [45, '45']].map(([m, l]) => {
+      const a = m * 6 * Math.PI / 180;
+      return `<text class="num" x="${(Math.sin(a) * 53).toFixed(2)}" y="${(-Math.cos(a) * 53).toFixed(2)}" text-anchor="middle" dominant-baseline="central">${l}</text>`;
+    }).join('');
+    return `<svg viewBox="-60 -60 120 120" aria-hidden="true"><circle class="face" r="45"/><path class="wedge" id="wedge" d="${wedge(ms)}"/>${ticks}<circle class="hub" r="4"/>${nums}</svg>`;
+  }
+  function paintTimer() {
+    const w = $('#wedge'), r = $('#t-read'), d = $('#dial');
+    if (!w || !r) return;
+    const left = tLeft();
+    w.setAttribute('d', wedge(left));
+    r.textContent = fmt(left);
+    if (d) d.classList.toggle('low', !!T.endsAt && left < 60000);
+  }
+
+  /* ---------- Ansichten ---------- */
+  function savepoint(t, removable) {
+    if (!t.note) return '';
+    return `<div class="savepoint">
+      <div class="savepoint-text"><p class="lbl">Speicherpunkt</p><p>${esc(t.note)}</p></div>
+      ${removable ? `<button class="icon-btn" type="button" data-a="clear-note" data-id="${t.id}" aria-label="Speicherpunkt entfernen">${ICON.x}</button>` : ''}
+    </div>`;
+  }
+
+  function stepsEditor(t) {
+    const list = t.steps.length ? `<ul class="steps">${t.steps.map(s => `
+      <li class="step${s.done ? ' is-done' : ''}">
+        <button class="check" type="button" role="checkbox" aria-checked="${s.done}" aria-label="${esc(s.t)}" data-a="toggle-step" data-id="${t.id}" data-sid="${s.id}"><span class="box">${ICON.check}</span></button>
+        <span class="step-text">${esc(s.t)}</span>
+        <button class="icon-btn" type="button" data-a="del-step" data-id="${t.id}" data-sid="${s.id}" aria-label="Schritt löschen">${ICON.x}</button>
+      </li>`).join('')}</ul>` : '';
+    return `${list}
+      <form class="field" data-f="step" data-id="${t.id}">
+        <input class="input" id="in-step-${t.id}" placeholder="${t.steps.length ? 'Noch ein Mini-Schritt' : 'Erster Mini-Schritt'}" autocomplete="off" aria-label="Mini-Schritt hinzufügen">
+        <button class="btn" type="submit">Dazu</button>
+      </form>`;
+  }
+
+  function timerHTML() {
+    const left = tLeft(), run = !!T.endsAt, over = !run && left <= 0;
+    return `<div class="timer">
+      <div class="dial${run && left < 60000 ? ' low' : ''}" id="dial">${dialSVG(left)}</div>
+      <div class="t-side">
+        <p class="lbl">${over ? 'Zeit ist um' : run ? 'Zeitlimit läuft' : 'Zeitlimit'}</p>
+        <p class="t-read" id="t-read">${fmt(left)}</p>
+        ${over ? '<p class="hint">Noch eine Runde oder kurz Pause? Beides ist okay.</p>' : ''}
+        <div class="chips">
+          ${run
+            ? `<button class="btn btn-sm" type="button" data-a="t-pause">Pause</button>`
+            : `<button class="btn btn-sm" type="button" data-a="t-start">${ICON.play} ${over ? 'Nochmal' : 'Start'}</button>`}
+          <button class="chip" type="button" data-a="t-add5">+5 Min</button>
+        </div>
+        <div class="chips" role="group" aria-label="Dauer wählen">
+          ${[5, 15, 25, 45].map(m => `<button class="chip" type="button" data-a="t-set" data-min="${m}" aria-pressed="${T.preset === m}">${m} Min</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function vJetzt() {
+    const t = active();
+    if (t) {
+      const open = t.steps.filter(s => !s.done), next = open[0];
+      let nextHTML;
+      if (next) {
+        nextHTML = `<div class="next">
+          <p class="lbl">Nächster kleiner Schritt · ${t.steps.length - open.length + 1} von ${t.steps.length}</p>
+          <p class="step-big"><mark>${esc(next.t)}</mark></p>
+          <button class="btn" type="button" data-a="stepdone" data-id="${t.id}">${ICON.check} Schritt erledigt</button>
+        </div>`;
+      } else if (t.steps.length) {
+        nextHTML = `<div class="next"><p class="step-big">Alle Schritte erledigt. Zeit für den großen Haken.</p></div>`;
+      } else {
+        nextHTML = `<div class="next"><p class="hint">Fühlt sich zu groß an? Schreib unten den allerersten Mini-Schritt auf. So klein, dass er fast lächerlich ist.</p></div>`;
+      }
+      return `<div class="stack">
+        <article class="panel corners focus">
+          <div class="focus-head">
+            <p class="eyebrow">Aktive Quest</p>
+            <h2 class="h-view now-title">${esc(t.title)}</h2>
+          </div>
+          ${savepoint(t, true)}
+          ${nextHTML}
+          ${timerHTML()}
+          <div class="actions">
+            <button class="btn btn-solid btn-big" type="button" data-a="finish">${ICON.check} Fertig</button>
+            <button class="btn btn-quiet btn-big" type="button" data-a="park-open" aria-expanded="${ui.parking}">Parken</button>
+          </div>
+          ${ui.parking ? `<form class="park" data-f="park">
+            <label class="lbl" for="in-park">Speicherpunkt setzen</label>
+            <p class="hint">Wo hörst du auf, was ist der nächste Handgriff? Dann findest du später sofort wieder rein.</p>
+            <input class="input" id="in-park" value="${esc(t.note)}" placeholder="z. B. Formular liegt bereit, als Nächstes Seite 2 ausfüllen" autocomplete="off">
+            <div class="row">
+              <button class="btn" type="submit">${ICON.save} Parken</button>
+              <button class="btn btn-quiet" type="button" data-a="park-cancel">Doch weitermachen</button>
+            </div>
+          </form>` : ''}
+        </article>
+        <section class="block" aria-labelledby="h-steps">
+          <h3 class="h-sec" id="h-steps">Mini-Schritte</h3>
+          ${stepsEditor(t)}
+        </section>
+        <form class="block" data-f="capture">
+          <label class="lbl" for="in-cap">Gedanke dazwischen?</label>
+          <div class="field">
+            <input class="input" id="in-cap" placeholder="Kurz notieren, später erledigen" autocomplete="off">
+            <button class="btn" type="submit">Notieren</button>
+          </div>
+          <p class="hint">Landet in „Kopf leeren“. Du bleibst hier bei deiner Quest.</p>
+        </form>
+      </div>`;
+    }
+
+    const h = heute(), n = h[0], dt = doneToday();
+    let out = '';
+    if (ui.win) {
+      out += `<div class="panel win" role="status">
+        <span class="diamond" aria-hidden="true"></span>
+        <p class="win-title">Quest abgeschlossen</p>
+        <p class="win-task">${esc(ui.win.title)}</p>
+        <p class="win-msg">${esc(ui.win.msg)}</p>
+      </div>`;
+    }
+    if (n) {
+      const sd = n.steps.filter(s => s.done).length;
+      out += `<article class="panel corners focus">
+        <div class="focus-head">
+          <p class="eyebrow">Als Nächstes dran</p>
+          <h2 class="h-view now-title">${esc(n.title)}</h2>
+          ${n.steps.length ? `<p class="hint">${sd} von ${n.steps.length} Mini-Schritten erledigt</p>` : ''}
+        </div>
+        ${savepoint(n, false)}
+        <div class="actions">
+          <button class="btn btn-solid btn-big" type="button" data-a="start" data-id="${n.id}">${ICON.play} Starten</button>
+          <button class="btn btn-big" type="button" data-a="start5" data-id="${n.id}">Nur 5 Minuten</button>
+        </div>
+        <p class="hint">Anfangen ist das Schwerste. Fünf Minuten reichen. Danach darfst du aufhören.</p>
+      </article>`;
+      if (h.length > 1) out += `<p class="hint">Danach: ${h.slice(1).map(t => esc(t.title)).join(' · ')}. Die Reihenfolge änderst du unter „Heute“.</p>`;
+    } else {
+      out += `<article class="panel corners focus">
+        <div class="focus-head">
+          <p class="eyebrow">Jetzt</p>
+          <h2 class="h-view">${dt.length ? 'Alles für heute erledigt' : 'Gerade läuft nichts'}</h2>
+          <p class="sub">${dt.length
+            ? 'Du kannst Feierabend machen. Oder du holst dir noch eine Sache.'
+            : 'Was ist die eine Sache, die heute zählt? Schreib sie auf und fang an.'}</p>
+        </div>
+        <form class="field" data-f="idle-add">
+          <input class="input" id="in-idle" placeholder="Eine Sache für heute" autocomplete="off" aria-label="Eine Sache für heute">
+          <button class="btn btn-solid" type="submit">Los</button>
+        </form>
+        ${inbox().length ? `<button class="link" type="button" data-a="tab" data-tab="kopf">Oder eine aus „Kopf leeren“ holen (${inbox().length})</button>` : ''}
+      </article>`;
+    }
+    if (dt.length) out += `<p class="tally">Heute abgeschlossen: <strong>${dt.length}</strong></p>`;
+    return `<div class="stack">${out}</div>`;
+  }
+
+  function vHeute() {
+    const h = heute(), slots = [];
+    for (let i = 0; i < MAX; i++) {
+      const t = h[i];
+      if (!t) {
+        slots.push(`<li class="slot slot-empty">
+          <span class="slot-num" aria-hidden="true">${i + 1}</span>
+          <div class="slot-body">${i === h.length ? `
+            <form class="field" data-f="heute-add">
+              <input class="input" id="in-heute" placeholder="Was steht an?" autocomplete="off" aria-label="Neue Aufgabe für heute">
+              <button class="btn" type="submit">Dazu</button>
+            </form>
+            ${inbox().length ? `<button class="link" type="button" data-a="tab" data-tab="kopf">Aus „Kopf leeren“ holen (${inbox().length})</button>` : ''}`
+            : '<p class="free">frei</p>'}
+          </div>
+        </li>`);
+        continue;
+      }
+      const isAct = t.id === S.activeId, sd = t.steps.filter(s => s.done).length, isOpen = ui.open === t.id;
+      let foot = '';
+      if (isAct) foot = `<button class="btn btn-solid btn-sm" type="button" data-a="tab" data-tab="jetzt">Zur aktiven Quest</button>`;
+      else if (i === 0 && !S.activeId) foot = `<button class="btn btn-solid btn-sm" type="button" data-a="start" data-id="${t.id}">${ICON.play} Starten</button><button class="btn btn-sm" type="button" data-a="start5" data-id="${t.id}">Nur 5 Min</button>`;
+      slots.push(`<li class="slot${i === 0 ? ' is-first' : ''}">
+        <span class="slot-num" aria-hidden="true">${i + 1}</span>
+        <div class="slot-body">
+          <button class="slot-title" type="button" data-a="open" data-id="${t.id}" aria-expanded="${isOpen}">${esc(t.title)}</button>
+          ${(isAct || t.steps.length || t.note) ? `<div class="meta">
+            ${isAct ? '<span class="pill pill-live">läuft gerade</span>' : ''}
+            ${t.steps.length ? `<span class="pill">${sd}/${t.steps.length} Schritte</span>` : ''}
+            ${t.note ? `<span class="pill pill-save">Weiter bei: ${esc(t.note)}</span>` : ''}
+          </div>` : ''}
+        </div>
+        <div class="slot-actions">
+          <button class="icon-btn" type="button" data-a="up" data-id="${t.id}" aria-label="Nach oben"${i === 0 ? ' disabled' : ''}>${ICON.up}</button>
+          <button class="icon-btn" type="button" data-a="down" data-id="${t.id}" aria-label="Nach unten"${i === h.length - 1 ? ' disabled' : ''}>${ICON.down}</button>
+        </div>
+        ${foot ? `<div class="slot-foot">${foot}</div>` : ''}
+        ${isOpen ? `<div class="slot-more">
+          <form class="field" data-f="rename" data-id="${t.id}">
+            <input class="input" id="rn-${t.id}" value="${esc(t.title)}" aria-label="Titel ändern" autocomplete="off">
+            <button class="btn" type="submit">Speichern</button>
+          </form>
+          <div class="block"><p class="lbl">Mini-Schritte</p>${stepsEditor(t)}</div>
+          <div class="row">
+            <button class="btn btn-sm" type="button" data-a="done-direct" data-id="${t.id}">${ICON.check} Schon erledigt</button>
+            <button class="btn btn-quiet btn-sm" type="button" data-a="to-inbox" data-id="${t.id}">Zurück in „Kopf leeren“</button>
+            <button class="btn btn-danger btn-sm" type="button" data-a="del-task" data-id="${t.id}">Löschen</button>
+          </div>
+        </div>` : ''}
+      </li>`);
+    }
+    const dt = doneToday();
+    return `<div class="stack">
+      <header class="view-head">
+        <p class="eyebrow">Quests für heute</p>
+        <h2 class="h-view">Heute</h2>
+        <p class="sub">Drei Plätze, nicht mehr. Oben steht, was als Nächstes dran ist. Tipp auf einen Titel für Mini-Schritte und mehr.</p>
+      </header>
+      <ol class="slots">${slots.join('')}</ol>
+      ${dt.length ? `<section class="block" aria-labelledby="h-done">
+        <h3 class="h-sec" id="h-done">Heute abgeschlossen <span class="count">${dt.length}</span></h3>
+        <ul class="done-list">${dt.slice().reverse().map(x => `<li><span class="d" aria-hidden="true"></span><span class="t">${esc(x.title)}</span><time>${hhmm(x.at)}</time></li>`).join('')}</ul>
+      </section>` : ''}
+    </div>`;
+  }
+
+  function vRoutinen() {
+    const cards = S.routines.map((r, idx) => {
+      const ids = rDone(r), editing = ui.editR === r.id;
+      const dn = r.steps.filter(s => ids.includes(s.id)).length;
+      const next = r.steps.find(s => !ids.includes(s.id));
+      return `<article class="panel routine">
+        <div class="r-head"><h3 class="r-name">${esc(r.name)}</h3><span class="r-count">${dn}/${r.steps.length}</span></div>
+        ${r.steps.length ? `<div class="segs" aria-hidden="true">${r.steps.map(s => `<span class="seg${ids.includes(s.id) ? ' on' : ''}"></span>`).join('')}</div>` : ''}
+        ${!editing && next ? `<div class="r-next">
+          <p class="lbl">Als Nächstes</p>
+          <p class="step-big"><mark>${esc(next.t)}</mark></p>
+          <button class="btn" type="button" data-a="r-toggle" data-id="${r.id}" data-sid="${next.id}">${ICON.check} Erledigt</button>
+        </div>` : ''}
+        ${!editing && !next && r.steps.length ? `<p class="r-done">Für heute erledigt</p>` : ''}
+        ${!r.steps.length && !editing ? `<p class="hint">Noch keine Schritte. Tipp auf „Bearbeiten“.</p>` : ''}
+        ${r.steps.length ? `<ul class="steps">${r.steps.map(s => {
+          const on = ids.includes(s.id);
+          return `<li class="step${on && !editing ? ' is-done' : ''}">
+            ${editing ? '' : `<button class="check" type="button" role="checkbox" aria-checked="${on}" aria-label="${esc(s.t)}" data-a="r-toggle" data-id="${r.id}" data-sid="${s.id}"><span class="box">${ICON.check}</span></button>`}
+            <span class="step-text">${esc(s.t)}</span>
+            ${editing ? `<button class="icon-btn" type="button" data-a="r-del-step" data-id="${r.id}" data-sid="${s.id}" aria-label="Schritt löschen">${ICON.x}</button>` : ''}
+          </li>`;
+        }).join('')}</ul>` : ''}
+        ${editing ? `
+          <form class="field" data-f="r-step" data-id="${r.id}">
+            <input class="input" id="in-rs-${r.id}" placeholder="Neuer Schritt" autocomplete="off" aria-label="Neuer Schritt">
+            <button class="btn" type="submit">Dazu</button>
+          </form>
+          <form class="field" data-f="r-rename" data-id="${r.id}">
+            <input class="input" id="rr-${r.id}" value="${esc(r.name)}" aria-label="Name der Routine" autocomplete="off">
+            <button class="btn" type="submit">Umbenennen</button>
+          </form>
+          <div class="row">
+            <button class="btn btn-solid btn-sm" type="button" data-a="r-edit" data-id="${r.id}">Fertig</button>
+            <button class="icon-btn" type="button" data-a="r-up" data-id="${r.id}" aria-label="Routine nach oben"${idx === 0 ? ' disabled' : ''}>${ICON.up}</button>
+            <button class="icon-btn" type="button" data-a="r-down" data-id="${r.id}" aria-label="Routine nach unten"${idx === S.routines.length - 1 ? ' disabled' : ''}>${ICON.down}</button>
+            <button class="btn btn-danger btn-sm" type="button" data-a="r-del" data-id="${r.id}">Routine löschen</button>
+          </div>`
+        : `<div class="row">
+            <button class="link" type="button" data-a="r-edit" data-id="${r.id}">Bearbeiten</button>
+            ${dn ? `<button class="link" type="button" data-a="r-reset" data-id="${r.id}">Zurücksetzen</button>` : ''}
+          </div>`}
+      </article>`;
+    }).join('');
+    return `<div class="stack">
+      <header class="view-head">
+        <p class="eyebrow">Tägliche Quests</p>
+        <h2 class="h-view">Routinen</h2>
+        <p class="sub">Jeden Tag gleich, damit du nicht nachdenken musst. Um Mitternacht hakt sich alles von selbst zurück.</p>
+      </header>
+      ${cards || `<div class="empty">
+        <strong>Noch keine Routine</strong>
+        <p>Starte mit einer Vorlage für morgens und abends. Du kannst danach jeden Schritt ändern.</p>
+        <button class="btn btn-solid" type="button" data-a="r-templates">Vorlagen anlegen</button>
+      </div>`}
+      <form class="block" data-f="r-add">
+        <label class="lbl" for="in-r-new">Neue Routine</label>
+        <div class="field">
+          <input class="input" id="in-r-new" placeholder="z. B. Nach der Arbeit" autocomplete="off">
+          <button class="btn" type="submit">Anlegen</button>
+        </div>
+      </form>
+    </div>`;
+  }
+
+  function vKopf() {
+    const items = inbox(), full = heute().length >= MAX;
+    return `<div class="stack">
+      <header class="view-head">
+        <p class="eyebrow">Gedankenspeicher</p>
+        <h2 class="h-view">Kopf leeren</h2>
+        <p class="sub">Alles raus, was dir durch den Kopf geht. Nicht sortieren, nicht bewerten. Was heute dran ist, schiebst du nach „Heute“.</p>
+      </header>
+      <form class="block" data-f="dump">
+        <div class="field">
+          <textarea class="input" id="in-dump" rows="1" data-enter placeholder="Was geht dir durch den Kopf?" aria-label="Gedanke oder Aufgabe"></textarea>
+          <button class="btn btn-solid" type="submit">Rein damit</button>
+        </div>
+        <p class="hint">Mehrere Zeilen auf einmal einfügen geht auch. Jede Zeile wird ein Eintrag.</p>
+      </form>
+      ${items.length ? `<ul class="dump-list">${items.slice().reverse().map(t => `
+        <li class="dump-item">
+          <span class="dump-text">${esc(t.title)}</span>
+          <button class="btn btn-sm${full ? ' btn-quiet' : ''}" type="button" data-a="to-heute" data-id="${t.id}" aria-label="${esc(t.title)} für heute einplanen">Heute</button>
+          <button class="icon-btn" type="button" data-a="del-task" data-id="${t.id}" aria-label="${esc(t.title)} löschen">${ICON.x}</button>
+        </li>`).join('')}</ul>
+        ${full ? '<p class="hint">Heute ist voll (3 von 3). Erst eine Sache fertig machen, dann ist wieder Platz.</p>' : ''}`
+      : `<div class="empty"><strong>Dein Kopf ist leer</strong><p>Wenn dir etwas einfällt, schreib es oben rein. Hier geht nichts verloren.</p></div>`}
+    </div>`;
+  }
+
+  const VIEWS = { jetzt: vJetzt, heute: vHeute, routinen: vRoutinen, kopf: vKopf };
+
+  function renderTabs() {
+    const h = heute().length, k = inbox().length;
+    const rLeft = S.routines.reduce((n, r) => n + r.steps.filter(s => !rDone(r).includes(s.id)).length, 0);
+    document.querySelectorAll('.tab').forEach(b => {
+      const tab = b.dataset.tab, badge = b.querySelector('.badge');
+      b.setAttribute('aria-current', tab === ui.tab ? 'page' : 'false');
+      let txt = '', live = false;
+      if (tab === 'jetzt' && S.activeId) live = true;
+      if (tab === 'heute' && h) txt = `${h}/${MAX}`;
+      if (tab === 'routinen' && rLeft) txt = String(rLeft);
+      if (tab === 'kopf' && k) txt = String(k);
+      badge.className = 'badge' + (live ? ' live' : '');
+      badge.textContent = live ? '' : txt;
+      badge.hidden = !live && !txt;
+    });
+  }
+
+  function render() {
+    const view = $('#view');
+    const vals = {};
+    view.querySelectorAll('input[id], textarea[id]').forEach(el => { vals[el.id] = el.value; });
+    const ae = document.activeElement;
+    const fid = ae && view.contains(ae) ? ae.id : null;
+    let sel = null;
+    try { if (fid && ae.selectionStart != null) sel = [ae.selectionStart, ae.selectionEnd]; } catch (e) { /* kein Textfeld */ }
+
+    view.innerHTML = VIEWS[ui.tab]();
+
+    for (const [id, v] of Object.entries(vals)) {
+      const el = document.getElementById(id);
+      if (el && v) { el.value = v; if (el.tagName === 'TEXTAREA') grow(el); }
+    }
+    if (fid) {
+      const el = document.getElementById(fid);
+      if (el) {
+        el.focus({ preventScroll: true });
+        if (sel) { try { el.setSelectionRange(sel[0], sel[1]); } catch (e) { /* kein Textfeld */ } }
+      }
+    }
+    $('#date').textContent = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+    renderTabs();
+    paintTimer();
+    paintSync();
+  }
+
+  /* ---------- Meldungen & Feier ---------- */
+  let toastTimer = null;
+  function toast(msg, withUndo) {
+    const el = $('#toast');
+    el.innerHTML = `<span>${esc(msg)}</span>${withUndo ? '<button type="button" data-a="undo">Rückgängig</button>' : ''}`;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; undoSnap = null; }, withUndo ? 6500 : 3200);
+  }
+  function burst() {
+    if (reducedMotion()) return;
+    const box = document.createElement('div');
+    box.className = 'burst';
+    const cols = ['#4fd8ff', '#ecf8ff', '#ffd57e', '#8be6ff'];
+    for (let i = 0; i < 26; i++) {
+      const p = document.createElement('i');
+      p.style.setProperty('--x', ((Math.random() * 2 - 1) * 170).toFixed(0) + 'px');
+      p.style.setProperty('--y', (-(70 + Math.random() * 170)).toFixed(0) + 'px');
+      p.style.setProperty('--r', (Math.random() * 540 - 270).toFixed(0) + 'deg');
+      p.style.background = cols[i % cols.length];
+      p.style.boxShadow = `0 0 6px ${cols[i % cols.length]}`;
+      p.style.animationDelay = (Math.random() * 90).toFixed(0) + 'ms';
+      box.appendChild(p);
+    }
+    document.body.appendChild(box);
+    setTimeout(() => box.remove(), 1500);
+  }
+  function grow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 2 + 'px'; }
+
+  /* ---------- Ereignisse ---------- */
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-a]');
+    if (!b || b.disabled) return;
+    const { a, id, sid, tab, min } = b.dataset;
+    switch (a) {
+      case 'tab':
+        if (ui.tab !== tab) { ui.tab = tab; ui.win = null; ui.parking = false; render(); window.scrollTo(0, 0); }
+        break;
+      case 'start': start(id); break;
+      case 'start5': start(id, 5); break;
+      case 'finish': finish(); break;
+      case 'park-open': ui.parking = !ui.parking; render(); if (ui.parking) setTimeout(() => $('#in-park')?.focus(), 0); break;
+      case 'park-cancel': ui.parking = false; render(); break;
+      case 'stepdone': nextStepDone(id); break;
+      case 'toggle-step': toggleStep(id, sid); break;
+      case 'del-step': delStep(id, sid); break;
+      case 'clear-note': clearNote(id); break;
+      case 'open': ui.open = ui.open === id ? null : id; render(); break;
+      case 'up': move(id, -1); break;
+      case 'down': move(id, 1); break;
+      case 'to-heute': toHeute(id); break;
+      case 'to-inbox': toInbox(id); break;
+      case 'del-task': delTask(id); break;
+      case 'done-direct': doneDirect(id); break;
+      case 't-set': tSet(Number(min)); render(); break;
+      case 't-start': tStart(); render(); break;
+      case 't-pause': tPause(); render(); break;
+      case 't-add5': tAdd5(); render(); break;
+      case 'r-templates': templates(); break;
+      case 'r-toggle': rToggle(id, sid); break;
+      case 'r-reset': rReset(id); break;
+      case 'r-edit': ui.editR = ui.editR === id ? null : id; render(); break;
+      case 'r-del': rDel(id); break;
+      case 'r-del-step': rDelStep(id, sid); break;
+      case 'r-up': rMove(id, -1); break;
+      case 'r-down': rMove(id, 1); break;
+      case 'undo': undo(); break;
+    }
+  });
+
+  document.addEventListener('submit', e => {
+    const f = e.target.closest('form[data-f]');
+    if (!f) return;
+    e.preventDefault();
+    const inp = f.querySelector('input, textarea');
+    const raw = inp ? inp.value : '';
+    const v = raw.trim();
+    const kind = f.dataset.f, id = f.dataset.id;
+    if (!v && kind !== 'park') { if (inp) inp.focus(); return; }
+    if (inp && kind !== 'rename' && kind !== 'r-rename') { inp.value = ''; if (inp.tagName === 'TEXTAREA') grow(inp); }
+    switch (kind) {
+      case 'dump': addTasks(raw, 'inbox'); break;
+      case 'capture': addTasks(v, 'inbox'); break;
+      case 'heute-add':
+      case 'idle-add': ui.win = null; addTasks(v, 'heute'); break;
+      case 'step': addSteps(id, raw); break;
+      case 'park': park(v); break;
+      case 'rename': rename(id, v); break;
+      case 'r-add': rAdd(v); break;
+      case 'r-step': rAddStep(id, raw); break;
+      case 'r-rename': rRename(id, v); break;
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    const t = e.target;
+    if (t.matches && t.matches('textarea[data-enter]') && e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      t.form.requestSubmit();
+    }
+  });
+  document.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') grow(e.target); });
+
+  /* ---------- Start ---------- */
+  const local = loadLocal();
+  if (local) S = local;
+  if (T.endsAt) { if (tLeft() > 0) startTick(); else { T.endsAt = null; T.left = 0; saveT(); } }
+  render();
+  connect().catch(() => setSync('local'));
+
+  let lastDay = today();
+  setInterval(() => { if (today() !== lastDay) { lastDay = today(); render(); } }, 60000);
+})();
+</script>
