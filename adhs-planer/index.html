@@ -555,7 +555,7 @@ select.input { padding-right: 8px; }
 .slot {
   position: relative;
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
   gap: 4px 10px;
   align-items: start;
   padding: 14px 10px 14px 12px;
@@ -776,6 +776,181 @@ select.input { padding-right: 8px; }
 .remind-title { font-family: var(--f-display); font-weight: var(--w-display); font-size: var(--fs-l); letter-spacing: var(--track); text-shadow: var(--text-glow); overflow-wrap: anywhere; }
 .remind-body { color: var(--ink-dim); overflow-wrap: anywhere; }
 
+/* ---------- Spiel: Status-Leiste, Rang, EXP ---------- */
+.player {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 8px 8px;
+  background: var(--surface);
+  border: 1px solid var(--line-dim);
+  border-radius: 6px;
+  text-align: left;
+}
+.player:hover, .player[aria-current="page"] { border-color: var(--line); box-shadow: 0 0 10px var(--glow-soft); }
+.rank { position: relative; display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; }
+.rank::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  transform: rotate(45deg);
+  border: 1.5px solid var(--line);
+  background: var(--tint);
+  box-shadow: 0 0 8px var(--glow-soft);
+}
+.rank b { position: relative; font-family: var(--f-display); font-weight: 700; font-size: .85rem; line-height: 1; }
+.rank.r-S::before { border-color: var(--gold); background: var(--gold-bg); box-shadow: 0 0 10px var(--gold-line); }
+.rank.r-S b { color: var(--gold); }
+.rank-sm { width: 26px; height: 26px; }
+.rank-sm::before { inset: 4px; }
+.rank-sm b { font-size: .7rem; }
+.rank-lg { width: 48px; height: 48px; }
+.rank-lg::before { inset: 7px; border-width: 2px; }
+.rank-lg b { font-size: 1.25rem; }
+.lv { font-family: var(--f-display); font-weight: 700; letter-spacing: .06em; white-space: nowrap; text-shadow: var(--text-glow); font-variant-numeric: tabular-nums; }
+.xpbar { position: relative; display: block; height: 10px; min-width: 0; background: repeating-linear-gradient(90deg, var(--panel-3) 0 5px, transparent 5px 7px); }
+.xpbar i { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(90deg, var(--line) 0 5px, transparent 5px 7px); filter: drop-shadow(0 0 3px var(--glow-strong)); }
+.xpnum { font-family: var(--f-display); font-size: var(--fs-xs); color: var(--ink-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.xp { font-family: var(--f-display); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; color: var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.q-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+
+/* Ring aus Segmenten (Mini-Schritte, EXP) */
+.ring { display: block; flex: none; overflow: visible; }
+.ring .sg { fill: none; stroke: var(--panel-3); }
+.ring .sg.on { stroke: var(--line); }
+.ring .rn { fill: var(--ink); font-family: var(--f-display); font-weight: 700; text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
+.ring .rl { fill: var(--ink-dim); font-family: var(--f-display); font-size: 7px; letter-spacing: .2em; text-anchor: middle; dominant-baseline: central; }
+.slot .ring { margin-top: -2px; }
+.slot.is-first .ring .sg.on { filter: drop-shadow(0 0 2px var(--glow-strong)); }
+
+/* Quest-Rad: digitales Tortendiagramm, ein Stück pro Quest */
+.wheel-sec { display: grid; gap: 14px; }
+.wheel-box { display: grid; grid-template-columns: minmax(0, 230px) minmax(0, 1fr); gap: 16px 22px; align-items: center; }
+.wheel-box.solo { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+@media (max-width: 520px) {
+  .wheel-box { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .wheel-box .legend { justify-self: stretch; }
+}
+.wheel { width: 100%; max-width: 250px; aspect-ratio: 1; }
+.wheel svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.wheel .cell { fill: var(--panel-3); transition: fill .2s ease; }
+.wheel .cell.on { fill: var(--line); }
+.wheel .slice.done { filter: drop-shadow(0 0 3px var(--glow-strong)); }
+.wheel .slice.empty .cell { fill: var(--panel-3); opacity: .35; }
+.wheel .slice[data-a] { cursor: pointer; }
+.wheel .slice[data-a]:hover .cell:not(.on) { fill: var(--line-dim); }
+.wheel .slice.active .cell.on { animation: pulse 2s ease-in-out infinite; }
+.wheel .wl { fill: var(--ink-faint); font-family: var(--f-display); font-size: 11px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+.wheel .wl.open { fill: var(--ink-dim); }
+.wheel .wl.active { fill: var(--line); }
+.wheel .wl.done { fill: var(--line); }
+.wheel .wt { stroke: var(--line-dim); stroke-width: .8; }
+.wheel .hub { fill: none; stroke: var(--line-dim); stroke-width: 1; stroke-dasharray: 3 4; transform-box: fill-box; transform-origin: center; animation: spin 30s linear infinite; }
+.wheel .w-pct { fill: var(--ink); font-family: var(--f-display); font-weight: 700; font-size: 19px; text-anchor: middle; dominant-baseline: central; font-variant-numeric: tabular-nums; }
+.wheel .w-sub { fill: var(--ink-dim); font-family: var(--f-display); font-size: 7.4px; letter-spacing: .16em; text-anchor: middle; dominant-baseline: central; }
+.legend { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; width: 100%; }
+.lg {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--sep);
+  border-radius: 4px;
+  text-align: left;
+}
+button.lg:hover { border-color: var(--line-dim); }
+.lg-n { font-family: var(--f-display); font-weight: 700; text-align: center; color: var(--ink-dim); }
+.lg-t { min-width: 0; overflow-wrap: anywhere; }
+.lg-v { font-family: var(--f-display); font-size: var(--fs-xs); color: var(--ink-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lg.active { border-color: var(--line); }
+.lg.active .lg-n, .lg.done .lg-n { color: var(--line); }
+.lg.done .lg-t { color: var(--ink-faint); text-decoration: line-through; text-decoration-color: var(--line-dim); }
+.lg.empty { background: transparent; border-style: dashed; color: var(--ink-faint); font-style: italic; }
+
+/* System-Meldungen und Level-Up */
+.sys {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: 16px;
+  right: 16px;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.sys-msg {
+  pointer-events: auto;
+  width: min(26rem, 100%);
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 0 18px var(--glow-strong), 0 10px 30px var(--scrim);
+  animation: drop2 .3s ease-out 1;
+}
+.sys-msg.small { width: auto; padding: 8px 14px; display: flex; align-items: baseline; gap: 10px; }
+.sys-msg.ach { border-color: var(--gold); box-shadow: 0 0 18px var(--gold-line), 0 10px 30px var(--scrim); }
+.sys-head { font-family: var(--f-display); font-size: .68rem; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--line); }
+.sys-msg.ach .sys-head { color: var(--gold); }
+.sys-title { font-family: var(--f-display); font-weight: var(--w-display); font-size: var(--fs-m); letter-spacing: var(--track); text-shadow: var(--text-glow); overflow-wrap: anywhere; }
+.sys-gains { list-style: none; padding: 0; display: grid; gap: 2px; font-size: var(--fs-s); color: var(--ink-dim); }
+.sys-gains li { display: flex; justify-content: space-between; gap: 14px; }
+.sys-gains b, .sys-sum { font-family: var(--f-display); color: var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sys-sum { font-size: var(--fs-l); font-weight: 700; text-shadow: var(--text-glow); }
+.lvl {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(3px);
+}
+.lvl-box { width: min(24rem, 100%); display: grid; gap: 12px; justify-items: center; text-align: center; padding: 30px 22px 24px; }
+.lvl-big { font-family: var(--f-display); font-weight: 700; font-size: clamp(2.1rem, 11vw, 2.9rem); letter-spacing: .12em; text-transform: uppercase; line-height: 1; text-shadow: var(--text-glow); animation: flicker 1.2s ease-out 1; }
+.lvl-num { font-family: var(--f-display); font-size: var(--fs-l); font-variant-numeric: tabular-nums; }
+.lvl-num strong { color: var(--line); text-shadow: var(--text-glow); }
+.lvl-rank { display: flex; align-items: center; gap: 10px; color: var(--ink-dim); }
+
+/* Status-Fenster */
+.status { display: grid; gap: 18px; }
+.st-top { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px 22px; align-items: center; }
+@media (max-width: 440px) { .st-top { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
+.st-rows { display: grid; width: 100%; }
+.st-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--sep); }
+.st-row:last-child { border-bottom: 0; }
+.st-row strong { font-family: var(--f-display); text-align: right; overflow-wrap: anywhere; min-width: 0; font-variant-numeric: tabular-nums; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.stat { display: grid; gap: 2px; padding: 12px; background: var(--surface); border: 1px solid var(--sep); border-radius: 5px; }
+.stat b { font-family: var(--f-display); font-size: var(--fs-xl); line-height: 1.1; font-variant-numeric: tabular-nums; text-shadow: var(--text-glow); }
+.stat span { font-size: var(--fs-s); color: var(--ink-dim); }
+.ladder { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.ladder li { display: grid; justify-items: center; gap: 4px; padding: 8px 2px; border: 1px solid var(--sep); border-radius: 4px; opacity: .5; }
+.ladder li.reached { opacity: 1; }
+.ladder li.cur { border-color: var(--line); box-shadow: 0 0 10px var(--glow-soft); }
+.ladder small { font-size: .7rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.ach { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.ach li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; padding: 10px; background: var(--surface); border: 1px solid var(--sep); border-radius: 5px; }
+.ach li.locked { opacity: .5; }
+.ach .gem { grid-row: span 2; width: 13px; height: 13px; margin: 5px 2px 0; transform: rotate(45deg); border: 1.5px solid var(--line-dim); }
+.ach li:not(.locked) .gem { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 8px var(--gold-line); }
+.ach-name { font-weight: 600; overflow-wrap: anywhere; }
+.ach-desc { font-size: var(--fs-s); color: var(--ink-dim); }
+.xp-table { width: 100%; border-collapse: collapse; font-size: var(--fs-s); }
+.xp-table td { padding: 6px 0; border-bottom: 1px solid var(--sep); }
+.xp-table td:last-child { text-align: right; font-family: var(--f-display); color: var(--line); white-space: nowrap; padding-left: 12px; }
+.xp-table tr:last-child td { border-bottom: 0; }
+
 /* Abschluss-Partikel */
 .burst { position: fixed; left: 50%; top: 40%; width: 0; height: 0; pointer-events: none; z-index: 30; }
 .burst i { position: absolute; width: 9px; height: 9px; transform: rotate(45deg); animation: burst 1.25s cubic-bezier(.2, .7, .3, 1) forwards; }
@@ -787,6 +962,9 @@ select.input { padding-right: 8px; }
 @keyframes flicker { 0% { opacity: 0; } 12% { opacity: .9; } 18% { opacity: .3; } 30% { opacity: 1; } 40% { opacity: .55; } 55%, 100% { opacity: 1; } }
 @keyframes drop { from { transform: translate(-50%, -16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 @keyframes breathe { 50% { opacity: .45; } }
+@keyframes drop2 { from { transform: translateY(-14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { opacity: .55; } }
 :root[data-motion="off"] *, :root[data-motion="off"] *::before, :root[data-motion="off"] *::after { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -804,6 +982,7 @@ select.input { padding-right: 8px; }
       <button class="icon-btn" type="button" id="gear" data-a="tab" data-tab="settings" aria-label="Einstellungen"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
   </header>
+  <button class="player" id="player" type="button" data-a="tab" data-tab="status" hidden></button>
   <main id="view"></main>
 </div>
 
@@ -816,6 +995,8 @@ select.input { padding-right: 8px; }
   </div>
 </nav>
 
+<div class="sys" id="sys" aria-live="polite"></div>
+<div class="lvl" id="lvl" role="dialog" aria-modal="true" aria-label="Level up" hidden></div>
 <div class="remind" id="remind" role="alert" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -866,6 +1047,79 @@ select.input { padding-right: 8px; }
     'Erledigt ist erledigt. Stark.'
   ];
 
+  /* ---------- Spiel: Ränge, Level, Erfolge ---------- */
+  const RANKS = ['E', 'D', 'C', 'B', 'A', 'S'];
+  const RANK_XP = { E: 20, D: 30, C: 45, B: 60, A: 80, S: 120 };
+  const PLAYER_RANKS = [
+    { r: 'E', from: 1, title: 'Neu erwacht' },
+    { r: 'D', from: 5, title: 'Im Aufstieg' },
+    { r: 'C', from: 10, title: 'Fokussiert' },
+    { r: 'B', from: 20, title: 'Unaufhaltsam' },
+    { r: 'A', from: 35, title: 'Meisterhaft' },
+    { r: 'S', from: 50, title: 'Legende' }
+  ];
+  const STAT_KEYS = ['quests', 'steps', 'dailies', 'focusMin', 'saves', 'perfectDays'];
+  const levelInfo = xp => {
+    let level = 1, need = 100, into = Math.max(0, xp);
+    while (into >= need) { into -= need; level++; need = 100 + (level - 1) * 30; }
+    return { level, into, need };
+  };
+  const rankFor = level => PLAYER_RANKS.reduce((cur, r) => (level >= r.from ? r : cur), PLAYER_RANKS[0]);
+  const autoRank = t => { const n = t.steps.length; return n >= 10 ? 'A' : n >= 7 ? 'B' : n >= 4 ? 'C' : n >= 2 ? 'D' : 'E'; };
+  const rankOf = t => t.rank || autoRank(t);
+  const questXP = t => RANK_XP[rankOf(t)];
+  const lvOf = g => levelInfo(g.xp).level;
+  const ACH = [
+    { id: 'q1', name: 'Erste Quest', desc: 'Die erste Quest abgeschlossen.', test: g => g.stats.quests >= 1 },
+    { id: 'q10', name: 'Zehn geschafft', desc: '10 Quests abgeschlossen.', test: g => g.stats.quests >= 10 },
+    { id: 'q50', name: 'Quest-Profi', desc: '50 Quests abgeschlossen.', test: g => g.stats.quests >= 50 },
+    { id: 's25', name: 'Schritt für Schritt', desc: '25 Mini-Schritte erledigt.', test: g => g.stats.steps >= 25 },
+    { id: 's100', name: 'Hundert kleine Siege', desc: '100 Mini-Schritte erledigt.', test: g => g.stats.steps >= 100 },
+    { id: 'd1', name: 'Erste Daily', desc: 'Eine Routine komplett geschafft.', test: g => g.stats.dailies >= 1 },
+    { id: 'd20', name: 'Gewohnheit', desc: '20 Routinen komplett geschafft.', test: g => g.stats.dailies >= 20 },
+    { id: 'f60', name: 'Eine Stunde Fokus', desc: '60 Minuten mit Zeitlimit gearbeitet.', test: g => g.stats.focusMin >= 60 },
+    { id: 'f600', name: 'Tiefer Fokus', desc: '10 Stunden mit Zeitlimit gearbeitet.', test: g => g.stats.focusMin >= 600 },
+    { id: 'sv1', name: 'Gespeichert', desc: 'Den ersten Speicherpunkt gesetzt.', test: g => g.stats.saves >= 1 },
+    { id: 'pd1', name: 'Perfekter Tag', desc: 'Alle Quests eines Tages geschafft.', test: g => g.stats.perfectDays >= 1 },
+    { id: 'pd7', name: 'Sieben perfekte Tage', desc: '7 Tage mit allen Quests geschafft.', test: g => g.stats.perfectDays >= 7 },
+    { id: 'rD', name: 'Rang D', desc: 'Level 5 erreicht.', test: g => lvOf(g) >= 5 },
+    { id: 'rC', name: 'Rang C', desc: 'Level 10 erreicht.', test: g => lvOf(g) >= 10 },
+    { id: 'rB', name: 'Rang B', desc: 'Level 20 erreicht.', test: g => lvOf(g) >= 20 }
+  ];
+  const XP_TABLE = [
+    ['Mini-Schritt erledigt', '+5'],
+    ['Quest Rang E · D · C', '+20 · +30 · +45'],
+    ['Quest Rang B · A · S', '+60 · +80 · +120'],
+    ['Fokus-Bonus (mit „Starten“ erledigt)', '+10'],
+    ['Pünktlich (am geplanten Tag oder früher)', '+10'],
+    ['Perfekter Tag (alle Quests des Tages)', '+25'],
+    ['Daily-Schritt', '+3'],
+    ['Daily komplett', '+15'],
+    ['Zeitlimit geschafft', '+10'],
+    ['Speicherpunkt gesetzt', '+2'],
+    ['Erfolg freigeschaltet', '+25']
+  ];
+
+  function normGame(x, done) {
+    const g = { xp: 0, keys: {}, stats: {}, ach: {} };
+    STAT_KEYS.forEach(k => { g.stats[k] = 0; });
+    if (!x || typeof x !== 'object') {
+      g.xp = done.length * RANK_XP.E;
+      g.stats.quests = done.length;
+      return g;
+    }
+    g.xp = Math.max(0, Math.floor(Number(x.xp) || 0));
+    if (x.keys && typeof x.keys === 'object') {
+      Object.entries(x.keys)
+        .filter(([k, v]) => k.length <= 90 && Number(v) > 0)
+        .sort((a, b) => b[1] - a[1]).slice(0, 2000)
+        .forEach(([k, v]) => { g.keys[k] = Number(v); });
+    }
+    if (x.stats && typeof x.stats === 'object') STAT_KEYS.forEach(k => { g.stats[k] = Math.max(0, Math.floor(Number(x.stats[k]) || 0)); });
+    if (x.ach && typeof x.ach === 'object') ACH.forEach(a => { if (Number(x.ach[a.id]) > 0) g.ach[a.id] = Number(x.ach[a.id]); });
+    return g;
+  }
+
   /* ---------- Einstellungen ---------- */
   const LOOKS = {
     system: { name: 'System', dark: true, accent: 'cyan', sw: ['#050b1c', '#143066', '#4fd8ff'] },
@@ -892,7 +1146,8 @@ select.input { padding-right: 8px; }
   const REMIND_VALS = REMINDS.map(r => r[0]);
   const DEF = {
     look: 'system', accent: '', font: 'klassisch', size: 'm', glow: true, motion: true, quest: true,
-    maxPerDay: 3, timer: 15, stepSize: 's', remindDefault: 15, briefOn: true, briefTime: '08:00', sound: true, vibrate: true
+    maxPerDay: 3, timer: 15, stepSize: 's', remindDefault: 15, briefOn: true, briefTime: '08:00', sound: true, vibrate: true,
+    playerName: ''
   };
 
   function normSettings(x) {
@@ -909,11 +1164,12 @@ select.input { padding-right: 8px; }
     if (x.stepSize === 's' || x.stepSize === 'xs') s.stepSize = x.stepSize;
     if (x.remindDefault != null && REMIND_VALS.includes(Number(x.remindDefault))) s.remindDefault = Number(x.remindDefault);
     if (isTime(x.briefTime)) s.briefTime = x.briefTime;
+    s.playerName = str(x.playerName, 24).trim();
     return s;
   }
 
   /* ---------- Daten ---------- */
-  const blank = () => ({ v: 2, updatedAt: 0, activeId: null, tasks: [], routines: [], done: [], settings: { ...DEF } });
+  const blank = () => ({ v: 3, updatedAt: 0, activeId: null, tasks: [], routines: [], done: [], settings: { ...DEF }, game: normGame({}, []) });
 
   function normalize(d) {
     const s = blank();
@@ -930,6 +1186,7 @@ select.input { padding-right: 8px; }
         date: isDate(t.date) ? t.date : (t.where === 'heute' ? today() : ''),
         time: isTime(t.time) ? t.time : '',
         remind: (t.remind != null && REMIND_VALS.includes(Number(t.remind))) ? Number(t.remind) : s.settings.remindDefault,
+        rank: RANKS.includes(t.rank) ? t.rank : '',
         steps: steps(t.steps),
         note: str(t.note, 300),
         createdAt: Number(t.createdAt) || Date.now()
@@ -949,6 +1206,7 @@ select.input { padding-right: 8px; }
     if (Array.isArray(d.done)) {
       s.done = d.done.filter(x => x && typeof x.title === 'string').slice(-150).map(x => ({ title: x.title.slice(0, 200), at: Number(x.at) || 0 }));
     }
+    s.game = normGame(d.game, s.done);
     return s;
   }
 
@@ -968,6 +1226,94 @@ select.input { padding-right: 8px; }
   const doneOn = k => S.done.filter(x => dayKey(new Date(x.at)) === k);
   const rDone = r => (r.day === today() ? r.doneIds : []);
   const hasContent = s => s.tasks.length || s.routines.length || s.done.length;
+  let profileName = '';
+  const playerName = () => S.settings.playerName || profileName || 'Spieler:in';
+
+  /* ---------- Spiel: EXP vergeben ---------- */
+  let gains = [], lvlUp = null, achNew = [];
+  function award(key, xp, reason, stat, by = 1, isAch = false) {
+    const g = S.game;
+    if (key) {
+      if (g.keys[key]) return 0;
+      g.keys[key] = Date.now();
+    }
+    const before = lvOf(g);
+    g.xp += xp;
+    if (stat) g.stats[stat] = (g.stats[stat] || 0) + by;
+    gains.push({ xp, reason, isAch });
+    const after = lvOf(g);
+    if (after > before) lvlUp = { from: lvlUp ? lvlUp.from : before, to: after };
+    return xp;
+  }
+  function checkAch() {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const a of ACH) {
+        if (!S.game.ach[a.id] && a.test(S.game)) {
+          S.game.ach[a.id] = Date.now();
+          achNew.push(a);
+          award(null, 25, `Erfolg: ${a.name}`, null, 1, true);
+          changed = true;
+        }
+      }
+    }
+  }
+  /* Erfolge, die schon verdient sind (z. B. aus der Zeit vor dem Spiel-Modus), nachholen */
+  function catchUp() {
+    if (ACH.some(a => !S.game.ach[a.id] && a.test(S.game))) settle('Erfolge');
+  }
+  function pruneKeys() {
+    const ks = Object.entries(S.game.keys);
+    if (ks.length <= 1800) return;
+    ks.sort((a, b) => b[1] - a[1]).slice(1500).forEach(([k]) => { delete S.game.keys[k]; });
+  }
+  function settle(title, small) {
+    checkAch();
+    pruneKeys();
+    commit();
+    const gs = gains.filter(g => !g.isAch), an = achNew, lu = lvlUp;
+    gains = []; achNew = []; lvlUp = null;
+    if (!S.settings.quest) return;
+    if (gs.length) sysMsg(title, gs, small && gs.length === 1);
+    an.forEach((a, i) => setTimeout(() => sysAch(a), 500 + i * 700));
+    if (lu) setTimeout(() => showLevelUp(lu), an.length ? 900 : 350);
+  }
+  function sysMsg(title, gs, small) {
+    const box = $('#sys'), el = document.createElement('div');
+    const sum = gs.reduce((s, g) => s + g.xp, 0);
+    el.className = 'sys-msg' + (small ? ' small' : '');
+    el.innerHTML = small
+      ? `<span class="sys-head">System</span><span>${esc(gs[0].reason)}</span><b class="sys-sum">+${sum} EXP</b>`
+      : `<p class="sys-head">System</p><p class="sys-title">${esc(title)}</p>
+         <ul class="sys-gains">${gs.map(g => `<li><span>${esc(g.reason)}</span><b>+${g.xp}</b></li>`).join('')}</ul>
+         <p class="sys-sum">+${sum} EXP</p>`;
+    box.appendChild(el);
+    while (box.children.length > 3) box.firstElementChild.remove();
+    setTimeout(() => el.remove(), small ? 2600 : 4200);
+  }
+  function sysAch(a) {
+    const box = $('#sys'), el = document.createElement('div');
+    el.className = 'sys-msg ach';
+    el.innerHTML = `<p class="sys-head">Erfolg freigeschaltet</p><p class="sys-title">${esc(a.name)}</p><p class="hint">${esc(a.desc)}</p><p class="sys-sum">+25 EXP</p>`;
+    box.appendChild(el);
+    while (box.children.length > 3) box.firstElementChild.remove();
+    setTimeout(() => el.remove(), 4800);
+  }
+  function showLevelUp(lu) {
+    const el = $('#lvl'), rOld = rankFor(lu.from), rNew = rankFor(lu.to);
+    el.innerHTML = `<div class="panel corners lvl-box">
+      <p class="sys-head">System</p>
+      <p class="lvl-big">Level up</p>
+      <p class="lvl-num">LV ${lu.from} → <strong>${lu.to}</strong></p>
+      ${rNew.r !== rOld.r ? `<div class="lvl-rank">${rankBadge(rNew.r, 'lg')}<span>Neuer Rang: <strong>${rNew.r}</strong> · ${esc(rNew.title)}</span></div>` : `<p class="hint">Weiter so, ${esc(playerName())}.</p>`}
+      <button class="btn btn-solid" type="button" data-a="lvl-ok">Weiter</button>
+    </div>`;
+    el.hidden = false;
+    if (S.settings.sound) fanfare();
+    burst();
+    setTimeout(() => el.querySelector('[data-a="lvl-ok"]')?.focus(), 50);
+  }
 
   function showDay(k) {
     const tk = today();
@@ -1045,13 +1391,17 @@ select.input { padding-right: 8px; }
     window.claude.use('sample').then(fn => { if (fn) { ai.fn = fn; render(); } }).catch(() => {});
     let db = null, user = null;
     try { [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]); } catch (e) { /* ohne Konto */ }
+    if (user) user.me().then(m => { if (m && m.name) { profileName = String(m.name).slice(0, 24); render(); } }).catch(() => {});
     if (!db || !user) { setSync('local'); return; }
     const uid = await user.id();
     if (!uid) { setSync('local'); return; }
     try { ref = db.doc('data/users/' + uid + '/planer'); } catch (e) { ref = null; setSync('local'); return; }
     ref.onSnapshot(snap => {
+      // Nur bestätigte Stände vom Server zählen; vorläufige aus dem Zwischenspeicher könnten veraltet sein.
+      if (snap.metadata.fromCache) return;
       if (!snap.exists) {
         if (hasContent(S)) queueRemote(); else setSync('cloud');
+        catchUp();
         return;
       }
       if (snap.metadata.hasPendingWrites || wTimer || writing) return;
@@ -1062,15 +1412,16 @@ select.input { padding-right: 8px; }
         render();
       } else if (remote.updatedAt < S.updatedAt) {
         queueRemote();
-        return;
+      } else {
+        setSync('cloud');
       }
-      setSync('cloud');
-    }, () => { ref = null; setSync('local'); });
+      catchUp();
+    }, () => { ref = null; setSync('local'); catchUp(); });
   }
 
   /* ---------- Aufgaben ---------- */
   const lines = v => v.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
-  const mkTask = (title, date) => ({ id: newId(), title: title.slice(0, 200), date, time: '', remind: S.settings.remindDefault, steps: [], note: '', createdAt: Date.now() });
+  const mkTask = (title, date) => ({ id: newId(), title: title.slice(0, 200), date, time: '', remind: S.settings.remindDefault, rank: '', steps: [], note: '', createdAt: Date.now() });
   const undoable = () => {
     const snap = JSON.stringify(S);
     return msg => toast(msg, { label: 'Rückgängig', run() { S = normalize(JSON.parse(snap)); commit(); } });
@@ -1125,7 +1476,7 @@ select.input { padding-right: 8px; }
     if (!t) return;
     const val = k => (document.getElementById(`ed-${k}-${id}`) || {}).value || '';
     const title = val('ti').trim(), date = isDate(val('da')) ? val('da') : '', time = isTime(val('tm')) ? val('tm') : '';
-    const re = Number(val('re'));
+    const re = Number(val('re')), rk = val('rk');
     if (!title) { toast('Der Titel darf nicht leer sein.'); return; }
     if (date && date !== t.date && isFull(date)) {
       const [msg, nf] = fullMsg(date);
@@ -1138,6 +1489,7 @@ select.input { padding-right: 8px; }
       if (S.activeId === id && date !== today()) S.activeId = null;
     }
     Object.assign(t, { title: title.slice(0, 200), date, time, remind: REMIND_VALS.includes(re) ? re : -1 });
+    if (document.getElementById(`ed-rk-${id}`)) t.rank = RANKS.includes(rk) ? rk : '';
     ui.open = null;
     if (date) showDay(date);
     commit();
@@ -1179,31 +1531,37 @@ select.input { padding-right: 8px; }
     commit();
     window.scrollTo(0, 0);
   }
-  function complete(t) {
+  function complete(t, viaFocus) {
+    const tk = today(), first = gains.length;
+    award(`t:${t.id}`, questXP(t), `Quest Rang ${rankOf(t)}`, 'quests');
+    if (viaFocus) award(`f:${t.id}`, 10, 'Fokus-Bonus');
+    if (t.date && t.date >= tk) award(`p:${t.id}`, 10, t.date > tk ? 'Früher als geplant' : 'Pünktlich');
     S.done.push({ title: t.title, at: Date.now() });
     S.tasks = S.tasks.filter(x => x !== t);
     if (S.activeId === t.id) S.activeId = null;
-    ui.win = { title: t.title, msg: WINS[Math.floor(Math.random() * WINS.length)] };
+    if (t.date === tk && !dayTasks(tk).length) award(`pd:${tk}`, 25, 'Perfekter Tag: alles geschafft', 'perfectDays');
+    const xp = gains.slice(first).reduce((s, g) => s + g.xp, 0);
+    ui.win = { title: t.title, msg: WINS[Math.floor(Math.random() * WINS.length)], xp };
     ui.parking = false;
     ui.open = null;
   }
   function finish() {
     const t = active();
     if (!t) return;
-    complete(t);
+    complete(t, true);
     tReset();
     ui.tab = 'jetzt';
-    commit();
+    settle(Q('Quest abgeschlossen', 'Erledigt'));
     window.scrollTo(0, 0);
     burst();
   }
   function doneDirect(id) {
     const t = byId(id);
     if (!t) return;
-    complete(t);
+    complete(t, false);
     ui.win = null;
-    commit();
-    toast(`Erledigt: ${t.title}`);
+    settle(Q('Quest abgeschlossen', 'Erledigt'));
+    if (!S.settings.quest) toast(`Erledigt: ${t.title}`);
     burst();
   }
   function park(note) {
@@ -1213,7 +1571,8 @@ select.input { padding-right: 8px; }
     S.activeId = null;
     ui.parking = false;
     if (T.endsAt) tPause();
-    commit();
+    if (t.note) award(`sv:${t.id}:${today()}`, 2, 'Speicherpunkt gesetzt', 'saves');
+    settle(Q('Quest pausiert', 'Geparkt'), true);
     toast(t.note ? Q('Speicherpunkt gesetzt. Deine Notiz wartet auf dich.', 'Geparkt. Deine Notiz wartet auf dich.') : 'Geparkt.');
   }
   function addSteps(id, text) {
@@ -1226,13 +1585,15 @@ select.input { padding-right: 8px; }
     const s = byId(id)?.steps.find(x => x.id === sid);
     if (!s) return;
     s.done = !s.done;
-    commit();
+    if (s.done) { award(`s:${sid}`, 5, 'Mini-Schritt', 'steps'); settle('Mini-Schritt', true); }
+    else commit();
   }
   function nextStepDone(id) {
     const s = byId(id)?.steps.find(x => !x.done);
     if (!s) return;
     s.done = true;
-    commit();
+    award(`s:${s.id}`, 5, 'Mini-Schritt', 'steps');
+    settle('Mini-Schritt', true);
     const t = byId(id);
     if (t && t.steps.every(x => x.done)) toast('Alle Schritte erledigt. Jetzt den großen Haken.');
   }
@@ -1309,11 +1670,15 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     const r = rById(id);
     if (!r) return;
     if (r.day !== today()) { r.day = today(); r.doneIds = []; }
-    const had = r.doneIds.includes(sid);
+    const had = r.doneIds.includes(sid), tk = today();
     r.doneIds = had ? r.doneIds.filter(x => x !== sid) : r.doneIds.concat(sid);
-    commit();
-    if (!had && r.steps.length && r.steps.every(s => r.doneIds.includes(s.id))) {
-      toast(`${r.name}: für heute geschafft.`);
+    if (had) { commit(); return; }
+    award(`r:${r.id}:${sid}:${tk}`, 3, 'Daily-Schritt');
+    const full = r.steps.length && r.steps.every(s => r.doneIds.includes(s.id));
+    if (full) award(`rc:${r.id}:${tk}`, 15, `Daily „${r.name}“ komplett`, 'dailies');
+    settle(full ? Q('Daily abgeschlossen', 'Routine geschafft') : 'Daily-Schritt', !full);
+    if (full) {
+      if (!S.settings.quest) toast(`${r.name}: für heute geschafft.`);
       burst();
     }
   }
@@ -1428,8 +1793,11 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
         saveT();
         stopTick();
         alertOut();
+        if (S.activeId) {
+          award(null, 10, 'Zeitlimit geschafft', 'focusMin', Math.max(1, Math.round(T.total / 60000)));
+          settle(Q('Zeitlimit erreicht', 'Timer abgelaufen'));
+        } else render();
         toast('Zeit ist um.');
-        render();
       }
     }, 250);
   }
@@ -1441,16 +1809,16 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
       if (ac && ac.state === 'suspended') ac.resume();
     } catch (e) { /* ohne Ton */ }
   }
-  function chime() {
+  function tones(freqs, gap, type) {
     try {
       if (!ac || ac.state !== 'running') return;
       const t0 = ac.currentTime;
-      [660, 784, 988].forEach((f, i) => {
-        const o = ac.createOscillator(), g = ac.createGain(), d = i * 0.32;
-        o.type = 'sine';
+      freqs.forEach((f, i) => {
+        const o = ac.createOscillator(), g = ac.createGain(), d = i * gap;
+        o.type = type || 'sine';
         o.frequency.value = f;
         g.gain.setValueAtTime(0.0001, t0 + d);
-        g.gain.exponentialRampToValueAtTime(0.22, t0 + d + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.2, t0 + d + 0.02);
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.3);
         o.connect(g).connect(ac.destination);
         o.start(t0 + d);
@@ -1458,6 +1826,8 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
       });
     } catch (e) { /* ohne Ton */ }
   }
+  const chime = () => tones([660, 784, 988], 0.32);
+  const fanfare = () => tones([523, 659, 784, 1047, 1319], 0.12, 'triangle');
   function alertOut() {
     if (S.settings.sound) chime();
     if (S.settings.vibrate) { try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) { /* ohne Vibration */ } }
@@ -1594,6 +1964,91 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
   }
 
   /* ---------- Ansichten ---------- */
+  const rankBadge = (r, size) => `<span class="rank r-${r}${size ? ' rank-' + size : ''}" title="Rang ${r}"><b>${r}</b></span>`;
+  const xpChip = t => (S.settings.quest ? `<span class="xp">+${questXP(t)} EXP</span>` : '');
+  const pt = (r, a) => `${(r * Math.sin(a)).toFixed(2)} ${(-r * Math.cos(a)).toFixed(2)}`;
+  const arc = (r, a1, a2) => `M${pt(r, a1)}A${r} ${r} 0 ${a2 - a1 > Math.PI ? 1 : 0} 1 ${pt(r, a2)}`;
+
+  /* Ring aus n Segmenten, lit davon leuchten */
+  function segRing(n, lit, r, w, gapDeg) {
+    if (n <= 1) return `<circle class="sg${lit >= 1 ? ' on' : ''}" r="${r}" stroke-width="${w}"/>`;
+    const step = 2 * Math.PI / n, g = gapDeg * Math.PI / 180;
+    let out = '';
+    for (let i = 0; i < n; i++) out += `<path class="sg${i < lit ? ' on' : ''}" stroke-width="${w}" d="${arc(r, i * step + g / 2, (i + 1) * step - g / 2)}"/>`;
+    return out;
+  }
+  function stepRing(t, label, px) {
+    const n = t ? t.steps.length : 0, d = t ? t.steps.filter(s => s.done).length : 0;
+    const segs = Math.min(n, 24), lit = n <= 24 ? d : Math.round(d / n * 24);
+    const fs = String(label).length > 3 ? 9 : 14;
+    return `<svg class="ring" viewBox="-22 -22 44 44" width="${px}" height="${px}" aria-hidden="true">
+      ${n ? segRing(segs, lit, 18, 4, segs > 12 ? 6 : 10) : '<circle class="sg" r="18" stroke-width="4" stroke-dasharray="2 3"/>'}
+      <text class="rn" font-size="${fs}">${esc(label)}</text></svg>`;
+  }
+
+  /* Quest-Rad: ein Tortenstück pro Quest, gefüllt von innen nach außen in digitalen Zellen */
+  function annulus(r1, r2, a1, a2) {
+    const large = a2 - a1 > Math.PI ? 1 : 0;
+    return `M${pt(r2, a1)}A${r2} ${r2} 0 ${large} 1 ${pt(r2, a2)}L${pt(r1, a2)}A${r1} ${r1} 0 ${large} 0 ${pt(r1, a1)}Z`;
+  }
+  function wheelItems(k) {
+    const open = dayTasks(k), done = doneOn(k), past = k < today();
+    const items = open.map((t, i) => {
+      const n = t.steps.length, d = t.steps.filter(s => s.done).length;
+      return { kind: t.id === S.activeId ? 'active' : 'open', id: t.id, label: String(i + 1), title: t.title, p: n ? d / n : 0, info: n ? `${d}/${n}` : '0 Schritte' };
+    });
+    if (!past) for (let i = open.length; i < cap(); i++) items.push({ kind: 'empty', label: String(i + 1), title: 'Freier Platz', p: 0, info: 'frei' });
+    done.forEach(x => items.push({ kind: 'done', label: '✓', title: x.title, p: 1, info: 'erledigt' }));
+    return items.slice(0, 8);
+  }
+  function wheelSVG(k, items) {
+    const counted = items.filter(x => x.kind !== 'empty');
+    const pct = counted.length ? Math.round(counted.reduce((s, x) => s + x.p, 0) / counted.length * 100) : null;
+    const doneN = items.filter(x => x.kind === 'done').length;
+    const R0 = 38, R = 96, BANDS = 5, GAP_R = 3, BAND = (R - R0 - (BANDS - 1) * GAP_R) / BANDS;
+    const n = Math.max(items.length, 1), span = 2 * Math.PI / n, gapS = 4 * Math.PI / 180;
+    const cellsPerBand = Math.max(1, Math.round((span * 180 / Math.PI) / 13)), gapC = 1.6 * Math.PI / 180;
+    let slices = '', labels = '';
+    items.forEach((it, i) => {
+      const a1 = i * span + gapS / 2, a2 = (i + 1) * span - gapS / 2, cw = (a2 - a1) / cellsPerBand;
+      const total = BANDS * cellsPerBand;
+      let lit = it.kind === 'done' ? total : Math.round(it.p * total);
+      if (it.kind !== 'done' && it.p > 0) lit = Math.min(total - 1, Math.max(1, lit));
+      let cells = '', idx = 0;
+      for (let b = 0; b < BANDS; b++) {
+        const r1 = R0 + b * (BAND + GAP_R), r2 = r1 + BAND;
+        for (let c = 0; c < cellsPerBand; c++, idx++) {
+          cells += `<path class="cell${idx < lit ? ' on' : ''}" d="${annulus(r1, r2, a1 + c * cw + gapC / 2, a1 + (c + 1) * cw - gapC / 2)}"/>`;
+        }
+      }
+      const act = it.kind === 'open' || it.kind === 'active' ? ` data-a="open-q" data-id="${it.id}"` : it.kind === 'empty' ? ' data-a="focus-add"' : '';
+      slices += `<g class="slice ${it.kind}"${act}><title>${esc(it.label === '✓' ? 'Erledigt' : 'Platz ' + it.label)}: ${esc(it.title)} (${esc(it.info)})</title>${cells}</g>`;
+      const mid = (a1 + a2) / 2;
+      labels += `<text class="wl ${it.kind}" x="${(Math.sin(mid) * (R + 13)).toFixed(2)}" y="${(-Math.cos(mid) * (R + 13)).toFixed(2)}">${esc(it.label)}</text>`;
+    });
+    let ticks = '';
+    for (let d = 0; d < 360; d += 6) {
+      const a = d * Math.PI / 180, long = d % 30 === 0;
+      ticks += `<line class="wt" x1="${(Math.sin(a) * (R + 3)).toFixed(2)}" y1="${(-Math.cos(a) * (R + 3)).toFixed(2)}" x2="${(Math.sin(a) * (R + (long ? 6 : 4.5))).toFixed(2)}" y2="${(-Math.cos(a) * (R + (long ? 6 : 4.5))).toFixed(2)}"/>`;
+    }
+    const aria = `${dayLabel(k)}: ${doneN} von ${counted.length} ${Q('Quests', 'Aufgaben')} erledigt${pct != null ? ', ' + pct + ' Prozent' : ''}`;
+    return `<div class="wheel"><svg viewBox="-124 -124 248 248" role="img" aria-label="${esc(aria)}">
+      ${ticks}
+      <circle class="hub" r="${R0 - 7}"/>
+      ${slices}${labels}
+      <text class="w-pct" y="-5">${pct == null ? '—' : pct + '%'}</text>
+      <text class="w-sub" y="12">${doneN}/${counted.length} ${Q('QUESTS', 'ERLEDIGT')}</text>
+    </svg></div>`;
+  }
+  function legendHTML(items) {
+    return `<ol class="legend">${items.map(it => {
+      const inner = `<span class="lg-n">${esc(it.label)}</span><span class="lg-t">${esc(it.title)}</span><span class="lg-v">${esc(it.info)}</span>`;
+      return (it.kind === 'open' || it.kind === 'active')
+        ? `<li><button class="lg ${it.kind}" type="button" data-a="open-q" data-id="${it.id}">${inner}</button></li>`
+        : `<li class="lg ${it.kind}">${inner}</li>`;
+    }).join('')}</ol>`;
+  }
+
   function savepoint(t, removable) {
     if (!t.note) return '';
     return `<div class="savepoint">
@@ -1666,6 +2121,10 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
           <div class="focus-head">
             <p class="eyebrow">${Q('Aktive Quest', 'Jetzt dran')}</p>
             <h2 class="h-view now-title">${esc(t.title)}</h2>
+            ${S.settings.quest || t.steps.length ? `<div class="q-head">
+              ${S.settings.quest ? rankBadge(rankOf(t)) + xpChip(t) : ''}
+              ${t.steps.length ? stepRing(t, `${t.steps.length - open.length}/${t.steps.length}`, 46) : ''}
+            </div>` : ''}
             ${whenLine(t)}
           </div>
           ${savepoint(t, true)}
@@ -1707,6 +2166,7 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
         <span class="diamond" aria-hidden="true"></span>
         <p class="win-title">${Q('Quest abgeschlossen', 'Geschafft')}</p>
         <p class="win-task">${esc(ui.win.title)}</p>
+        ${S.settings.quest && ui.win.xp ? `<p class="sys-sum">+${ui.win.xp} EXP</p>` : ''}
         <p class="win-msg">${esc(ui.win.msg)}</p>
       </div>`;
     }
@@ -1716,6 +2176,7 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
         <div class="focus-head">
           <p class="eyebrow">Als Nächstes dran</p>
           <h2 class="h-view now-title">${esc(n.title)}</h2>
+          ${S.settings.quest ? `<div class="q-head">${rankBadge(rankOf(n))}${xpChip(n)}</div>` : ''}
           ${whenLine(n)}
           ${n.steps.length ? `<p class="hint">${sd} von ${n.steps.length} Mini-Schritten erledigt</p>` : ''}
         </div>
@@ -1726,7 +2187,6 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
         </div>
         <p class="hint">Anfangen ist das Schwerste. Fünf Minuten reichen. Danach darfst du aufhören.</p>
       </article>`;
-      if (h.length > 1) out += `<p class="hint">Danach: ${h.slice(1).map(t => esc(t.title)).join(' · ')}. Die Reihenfolge änderst du im Plan.</p>`;
     } else {
       out += `<article class="panel corners focus">
         <div class="focus-head">
@@ -1743,7 +2203,15 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
         ${inbox().length ? `<button class="link" type="button" data-a="tab" data-tab="kopf">Oder eine aus „Kopf leeren“ holen (${inbox().length})</button>` : ''}
       </article>`;
     }
-    if (od.length) out += `<button class="link" type="button" data-a="tab" data-tab="plan">${od.length === 1 ? 'Eine Sache ist' : od.length + ' Sachen sind'} von früher noch offen. Im Plan ansehen</button>`;
+    const items = wheelItems(tk);
+    if (items.some(x => x.kind !== 'empty')) {
+      out += `<section class="panel panel-quiet wheel-sec" aria-labelledby="h-wheel-j">
+        <h3 class="h-sec" id="h-wheel-j">${Q('Tages-Quests', 'Dein Tag')}</h3>
+        <div class="wheel-box">${wheelSVG(tk, items)}${legendHTML(items)}</div>
+        <p class="hint">Die Reihenfolge änderst du im ${Q('Quest-Log', 'Plan')}.</p>
+      </section>`;
+    }
+    if (od.length) out += `<button class="link" type="button" data-a="tab" data-tab="plan">${od.length === 1 ? 'Eine Sache ist' : od.length + ' Sachen sind'} von früher noch offen. Im ${Q('Quest-Log', 'Plan')} ansehen</button>`;
     if (dt.length) out += `<p class="tally">Heute abgeschlossen: <strong>${dt.length}</strong></p>`;
     return `<div class="stack">${out}</div>`;
   }
@@ -1755,7 +2223,12 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
           <div class="fld"><label class="lbl" for="ed-da-${t.id}">Tag</label><input class="input" type="date" id="ed-da-${t.id}" value="${t.date}"></div>
           <div class="fld"><label class="lbl" for="ed-tm-${t.id}">Uhrzeit</label><input class="input" type="time" id="ed-tm-${t.id}" value="${t.time}"></div>
           <div class="fld"><label class="lbl" for="ed-re-${t.id}">Erinnerung</label><select class="input" id="ed-re-${t.id}">${REMINDS.map(([v, l]) => `<option value="${v}"${v === t.remind ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+          ${S.settings.quest ? `<div class="fld"><label class="lbl" for="ed-rk-${t.id}">Rang</label><select class="input" id="ed-rk-${t.id}">
+            <option value=""${!t.rank ? ' selected' : ''}>Automatisch (${autoRank(t)})</option>
+            ${RANKS.map(r => `<option value="${r}"${t.rank === r ? ' selected' : ''}>${r} · +${RANK_XP[r]} EXP</option>`).join('')}
+          </select></div>` : ''}
         </div>
+        ${S.settings.quest ? '<p class="hint">Automatischer Rang: Je mehr Mini-Schritte, desto höher der Rang und desto mehr EXP.</p>' : ''}
         ${!t.time ? '<p class="hint">Mit Uhrzeit erinnert dich der Planer rechtzeitig. Ohne Uhrzeit steht die Aufgabe im Tagesüberblick.</p>' : ''}
         <div class="row">
           <button class="btn btn-solid btn-sm" type="submit">Speichern</button>
@@ -1777,13 +2250,14 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     else if (isToday && i === 0 && !S.activeId) foot = `<button class="btn btn-solid btn-sm" type="button" data-a="start" data-id="${t.id}">${ICON.play} Starten</button><button class="btn btn-sm" type="button" data-a="start5" data-id="${t.id}">Nur 5 Min</button>`;
     else if (!isOpen && !t.steps.length) foot = `<button class="link" type="button" data-a="open" data-id="${t.id}">Uhrzeit, Erinnerung, Mini-Schritte</button>`;
     const pills = [
+      S.settings.quest ? `${rankBadge(rankOf(t), 'sm')}${xpChip(t)}` : '',
       isAct ? '<span class="pill pill-live">läuft gerade</span>' : '',
       t.time ? `<span class="pill">${ICON.clock}${t.time}${t.remind >= 0 ? ' ' + ICON.bell : ''}</span>` : '',
       t.steps.length ? `<span class="pill">${sd}/${t.steps.length} Schritte</span>` : '',
       t.note ? `<span class="pill pill-save">Weiter bei: ${esc(t.note)}</span>` : ''
     ].join('');
-    return `<li class="slot${i === 0 && isToday ? ' is-first' : ''}">
-      <span class="slot-num" aria-hidden="true">${i + 1}</span>
+    return `<li class="slot${i === 0 && isToday ? ' is-first' : ''}" id="slot-${t.id}">
+      ${stepRing(t, i + 1, 44)}
       <div class="slot-body">
         <button class="slot-title" type="button" data-a="open" data-id="${t.id}" aria-expanded="${isOpen}">${esc(t.title)}</button>
         ${pills ? `<div class="meta">${pills}</div>` : ''}
@@ -1816,7 +2290,7 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     if (!past) {
       for (let i = list.length; i < c; i++) {
         slots.push(`<li class="slot slot-empty">
-          <span class="slot-num" aria-hidden="true">${i + 1}</span>
+          ${stepRing(null, i + 1, 44)}
           <div class="slot-body">${i === list.length ? `
             <form class="field" data-f="day-add">
               <input class="input" id="in-day-add" placeholder="Was steht an?" autocomplete="off" aria-label="Neue Aufgabe für ${esc(dayLabel(ui.day))}">
@@ -1831,9 +2305,9 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     const dt = doneOn(ui.day);
     return `<div class="stack">
       <header class="view-head">
-        <p class="eyebrow">${Q('Quest-Plan', 'Dein Plan')}</p>
-        <h2 class="h-view">Plan</h2>
-        <p class="sub">Höchstens ${c} ${c === 1 ? 'Sache' : 'Sachen'} pro Tag. Tipp auf einen Tag, dann trag ein, was ansteht. Oben steht, was zuerst dran ist.</p>
+        <p class="eyebrow">${Q('Plan', 'Dein Plan')}</p>
+        <h2 class="h-view">${Q('Quest-Log', 'Plan')}</h2>
+        <p class="sub">Höchstens ${c} ${Q(c === 1 ? 'Quest' : 'Quests', c === 1 ? 'Sache' : 'Sachen')} pro Tag. Tipp auf einen Tag, dann trag ein, was ansteht. Jedes Stück im Rad ist eine ${Q('Quest', 'Aufgabe')} und füllt sich mit jedem Mini-Schritt.</p>
       </header>
       <div class="block">
         <div class="strip" role="group" aria-label="Woche">
@@ -1846,6 +2320,11 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
           <label class="pick"><span class="hint">Anderer Tag</span><input class="input input-sm" type="date" id="pick-day" data-bound value="${ui.day}"></label>
         </div>
       </div>
+      <section class="panel corners wheel-sec" aria-labelledby="h-day">
+        <div class="day-head"><h3 class="h-sec" id="h-day">${esc(dayLabel(ui.day))}</h3><span class="r-count">${list.length}/${c}</span></div>
+        <div class="wheel-box solo">${wheelSVG(ui.day, wheelItems(ui.day))}</div>
+        <p class="hint">Die Zahlen im Rad passen zu den Plätzen unten. ✓ heißt erledigt. Tipp auf ein Stück, um die ${Q('Quest', 'Aufgabe')} zu öffnen.</p>
+      </section>
       ${od.length ? `<section class="block" aria-labelledby="h-od">
         <h3 class="h-sec" id="h-od">Noch offen von früher</h3>
         <p class="hint">Kein Problem. Hol es auf heute oder gib ihm einen neuen Tag.</p>
@@ -1858,8 +2337,8 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
           ${ui.open === t.id ? `<div class="slot-more">${editorHTML(t)}</div>` : ''}
         </li>`).join('')}</ul>
       </section>` : ''}
-      <section class="block" aria-labelledby="h-day">
-        <div class="day-head"><h3 class="h-sec" id="h-day">${esc(dayLabel(ui.day))}</h3><span class="r-count">${list.length}/${c}</span></div>
+      <section class="block" aria-labelledby="h-slots">
+        <h3 class="h-sec" id="h-slots">${Q('Quests', 'Aufgaben')}</h3>
         ${past && !list.length ? '<p class="hint">An diesem Tag ist nichts mehr offen.</p>' : `<ol class="slots">${slots.join('')}</ol>`}
       </section>
       ${dt.length ? `<section class="block" aria-labelledby="h-done">
@@ -1876,6 +2355,7 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
       const next = r.steps.find(s => !ids.includes(s.id));
       return `<article class="panel routine">
         <div class="r-head"><h3 class="r-name">${esc(r.name)}</h3><span class="r-count">${r.time ? `${ICON.bell} ${r.time} · ` : ''}${dn}/${r.steps.length}</span></div>
+        ${S.settings.quest && r.steps.length ? `<p class="xp">+3 EXP pro Schritt · +15 EXP komplett</p>` : ''}
         ${r.steps.length ? `<div class="segs" aria-hidden="true">${r.steps.map(s => `<span class="seg${ids.includes(s.id) ? ' on' : ''}"></span>`).join('')}</div>` : ''}
         ${!editing && next ? `<div class="r-next">
           <p class="lbl">Als Nächstes</p>
@@ -1918,8 +2398,8 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     }).join('');
     return `<div class="stack">
       <header class="view-head">
-        <p class="eyebrow">${Q('Tägliche Quests', 'Jeden Tag')}</p>
-        <h2 class="h-view">Routinen</h2>
+        <p class="eyebrow">${Q('Routinen · jeden Tag neu', 'Jeden Tag')}</p>
+        <h2 class="h-view">${Q('Dailys', 'Routinen')}</h2>
         <p class="sub">Jeden Tag gleich, damit du nicht nachdenken musst. Um Mitternacht hakt sich alles von selbst zurück.</p>
       </header>
       ${cards || `<div class="empty">
@@ -1941,9 +2421,9 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     const items = inbox(), tk = today(), tm = addDays(tk, 1);
     return `<div class="stack">
       <header class="view-head">
-        <p class="eyebrow">${Q('Gedankenspeicher', 'Alles raus')}</p>
-        <h2 class="h-view">Kopf leeren</h2>
-        <p class="sub">Alles raus, was dir durch den Kopf geht. Nicht sortieren, nicht bewerten. Mit „Einplanen“ gibst du einer Sache einen Tag.</p>
+        <p class="eyebrow">${Q('Kopf leeren', 'Alles raus')}</p>
+        <h2 class="h-view">${Q('Inventar', 'Kopf leeren')}</h2>
+        <p class="sub">Alles raus, was dir durch den Kopf geht. Nicht sortieren, nicht bewerten. ${Q('Mit „Einplanen“ wird daraus eine Quest mit Tag.', 'Mit „Einplanen“ gibst du einer Sache einen Tag.')}</p>
       </header>
       <form class="block" data-f="dump">
         <div class="field">
@@ -2004,7 +2484,10 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
         </div>
         ${toggle('glow', 'Leuchten', 'Leuchtende Rahmen und Schrift. Aus ist ruhiger.')}
         ${toggle('motion', 'Animationen', 'Funkeln beim Abhaken und sanfte Übergänge.')}
-        ${toggle('quest', 'Spiel-Sprache', 'Wörter wie „Quest“ und „Speicherpunkt“. Aus heißt: ganz normale Wörter.')}
+        ${toggle('quest', 'Spiel-Modus', 'Quests, EXP, Level, Ränge und Erfolge. Aus heißt: ganz normaler Planer mit normalen Wörtern.')}
+        ${st.quest ? `<div class="set-row"><label class="lbl" for="set-name">Spielername</label>
+          <input class="input" id="set-name" data-k="playerName" maxlength="24" value="${esc(st.playerName)}" placeholder="${esc(profileName || 'Spieler:in')}" autocomplete="off">
+          <p class="hint">Erscheint im Status-Fenster. Leer lassen für deinen Kontonamen.</p></div>` : ''}
       </section>
 
       <section class="panel panel-quiet set-sec" aria-labelledby="h-plan">
@@ -2051,13 +2534,79 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     </div>`;
   }
 
-  const VIEWS = { jetzt: vJetzt, plan: vPlan, routinen: vRoutinen, kopf: vKopf, settings: vSettings };
+  function vStatus() {
+    const g = S.game, li = levelInfo(g.xp), rk = rankFor(li.level), next = PLAYER_RANKS[PLAYER_RANKS.indexOf(rk) + 1];
+    const cells = 40, lit = Math.round(li.into / li.need * cells);
+    const xpRing = `<svg class="ring" viewBox="-62 -62 124 124" width="150" height="150" role="img" aria-label="Level ${li.level}, ${li.into} von ${li.need} EXP">
+      ${segRing(cells, lit, 52, 8, 3)}
+      <circle class="sg" r="40" stroke-width="1" stroke-dasharray="2 3"/>
+      <text class="rl" y="-16">LEVEL</text>
+      <text class="rn" y="6" font-size="30">${li.level}</text>
+      <text class="rl" y="26">${li.into}/${li.need}</text>
+    </svg>`;
+    const unlocked = ACH.filter(a => g.ach[a.id]).length;
+    const stats = [
+      [g.stats.quests, 'Quests abgeschlossen'],
+      [g.stats.steps, 'Mini-Schritte erledigt'],
+      [g.stats.dailies, 'Dailys komplett'],
+      [g.stats.focusMin, 'Minuten im Fokus'],
+      [g.stats.saves, 'Speicherpunkte'],
+      [g.stats.perfectDays, 'Perfekte Tage']
+    ];
+    return `<div class="stack">
+      <header class="view-head">
+        <p class="eyebrow">System</p>
+        <h2 class="h-view">Status</h2>
+      </header>
+      <section class="panel corners status" aria-label="Status-Fenster">
+        <div class="st-top">
+          ${xpRing}
+          <div class="st-rows">
+            <div class="st-row"><span class="lbl">Name</span><strong>${esc(playerName())}</strong></div>
+            <div class="st-row"><span class="lbl">Level</span><strong>${li.level}</strong></div>
+            <div class="st-row"><span class="lbl">Rang</span><strong>${rankBadge(rk.r, 'sm')}</strong></div>
+            <div class="st-row"><span class="lbl">Titel</span><strong>${esc(rk.title)}</strong></div>
+            <div class="st-row"><span class="lbl">EXP gesamt</span><strong>${g.xp}</strong></div>
+          </div>
+        </div>
+        <p class="hint">${next ? `Noch ${next.from - li.level} Level bis Rang ${next.r} (${esc(next.title)}). Bis zum nächsten Level fehlen ${li.need - li.into} EXP.` : 'Höchster Rang erreicht. Legende.'}</p>
+        <ol class="ladder" aria-label="Rang-Leiter">${PLAYER_RANKS.map(r => `<li class="${li.level >= r.from ? 'reached' : ''}${r.r === rk.r ? ' cur' : ''}">${rankBadge(r.r, 'sm')}<small>ab LV ${r.from}</small></li>`).join('')}</ol>
+      </section>
+      <section class="block" aria-labelledby="h-stats">
+        <h3 class="h-sec" id="h-stats">Werte</h3>
+        <div class="stat-grid">${stats.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+      </section>
+      <section class="block" aria-labelledby="h-ach">
+        <h3 class="h-sec" id="h-ach">Erfolge <span class="count">${unlocked}/${ACH.length}</span></h3>
+        <ul class="ach">${ACH.map(a => `<li class="${g.ach[a.id] ? '' : 'locked'}"><span class="gem" aria-hidden="true"></span><span class="ach-name">${esc(a.name)}</span><span class="ach-desc">${esc(a.desc)}${g.ach[a.id] ? '' : ' (noch offen)'}</span></li>`).join('')}</ul>
+      </section>
+      <section class="block" aria-labelledby="h-xp">
+        <h3 class="h-sec" id="h-xp">So bekommst du EXP</h3>
+        <table class="xp-table"><tbody>${XP_TABLE.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</tbody></table>
+        <p class="hint">Abhaken bringt EXP. Wieder aufmachen nimmt nichts weg. Es gibt keine Strafen.</p>
+      </section>
+    </div>`;
+  }
+
+  const VIEWS = { jetzt: vJetzt, plan: vPlan, routinen: vRoutinen, kopf: vKopf, settings: vSettings, status: vStatus };
+  const TAB_NAMES = { jetzt: ['Aktiv', 'Jetzt'], plan: ['Quest-Log', 'Plan'], routinen: ['Dailys', 'Routinen'], kopf: ['Inventar', 'Kopf leeren'] };
+
+  function paintPlayer() {
+    const el = $('#player');
+    if (!S.settings.quest) { el.hidden = true; return; }
+    const li = levelInfo(S.game.xp), rk = rankFor(li.level);
+    el.innerHTML = `${rankBadge(rk.r)}<span class="lv">LV ${li.level}</span><span class="xpbar" aria-hidden="true"><i style="width:${(li.into / li.need * 100).toFixed(1)}%"></i></span><span class="xpnum">${li.into}/${li.need} EXP</span>`;
+    el.setAttribute('aria-label', `Status öffnen: Level ${li.level}, Rang ${rk.r}, ${li.into} von ${li.need} EXP`);
+    el.setAttribute('aria-current', ui.tab === 'status' ? 'page' : 'false');
+    el.hidden = false;
+  }
 
   function renderTabs() {
     const h = dayTasks(today()).length, k = inbox().length;
     const rLeft = S.routines.reduce((n, r) => n + r.steps.filter(s => !rDone(r).includes(s.id)).length, 0);
     document.querySelectorAll('.tab').forEach(b => {
       const tab = b.dataset.tab, badge = b.querySelector('.badge');
+      b.querySelector('span').textContent = Q(...TAB_NAMES[tab]);
       b.setAttribute('aria-current', tab === ui.tab ? 'page' : 'false');
       let txt = '', live = false;
       if (tab === 'jetzt' && S.activeId) live = true;
@@ -2095,7 +2644,9 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
       }
     }
     $('#date').textContent = fmtLong(today());
+    if (ui.tab === 'status' && !S.settings.quest) ui.tab = 'jetzt';
     renderTabs();
+    paintPlayer();
     paintTimer();
     paintSync();
   }
@@ -2210,6 +2761,22 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
         done('Alles gelöscht.');
         break;
       }
+      case 'open-q': {
+        const t = byId(id);
+        if (!t) break;
+        ui.tab = 'plan';
+        showDay(t.date || today());
+        ui.open = id;
+        render();
+        setTimeout(() => document.getElementById('slot-' + id)?.scrollIntoView({ block: 'center', behavior: S.settings.motion ? 'smooth' : 'auto' }), 30);
+        break;
+      }
+      case 'focus-add': {
+        const inp = $('#in-day-add') || $('#in-idle');
+        if (inp) { inp.scrollIntoView({ block: 'center' }); inp.focus({ preventScroll: true }); }
+        break;
+      }
+      case 'lvl-ok': $('#lvl').hidden = true; break;
       case 'toast-act': {
         const fn = toastAct;
         $('#toast').hidden = true;
@@ -2226,6 +2793,7 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
     if (el.dataset && el.dataset.k && el.matches('select, input')) {
       const k = el.dataset.k;
       if (k === 'remindDefault') setSetting(k, Number(el.value));
+      else if (k === 'playerName') setSetting(k, el.value);
       else if (k === 'briefTime' && isTime(el.value)) setSetting(k, el.value);
     }
   });
@@ -2257,6 +2825,7 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
 
   document.addEventListener('keydown', e => {
     const t = e.target;
+    if (e.key === 'Escape' && !$('#lvl').hidden) { $('#lvl').hidden = true; return; }
     if (t.matches && t.matches('textarea[data-enter]') && e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       t.form.requestSubmit();
@@ -2270,7 +2839,7 @@ Antworte nur mit JSON in dieser Form: {"steps": ["Erster Schritt", "Zweiter Schr
   if (local) S = local;
   if (T.endsAt) { if (tLeft() > 0) startTick(); else { T.endsAt = null; T.left = 0; saveT(); } }
   render();
-  connect().catch(() => setSync('local'));
+  connect().then(() => { if (!ref) catchUp(); }).catch(() => { setSync('local'); catchUp(); });
   setTimeout(checkReminders, 2500);
   setInterval(checkReminders, 15000);
 
