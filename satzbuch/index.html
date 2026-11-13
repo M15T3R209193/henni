@@ -1,0 +1,1113 @@
+<title>Satzbuch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: schmale Logbuch-Spalte (max. 640px). Oben Reiter Heute | Verlauf | Plan, unten am Daumen die Aufnahmeleiste. Farben nach Hantelscheiben: Blau (20 kg) als Akzent, Rot (25 kg) für Aufnahme. */
+:root {
+  --bg: #edf0f4;
+  --surface: #ffffff;
+  --surface-2: #f5f7fa;
+  --ink: #141a22;
+  --ink-2: #4a5563;
+  --muted: #7a8594;
+  --line: #dbe1e8;
+  --accent: #1d56d6;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3ebfc;
+  --rec: #d42f28;
+  --rec-ink: #ffffff;
+  --rec-soft: #fbe4e2;
+  --up: #11804a;
+  --up-soft: #dcf2e6;
+  --down: #b4471c;
+  --down-soft: #fbe9df;
+  --warn-bg: #fff4d4;
+  --warn-ink: #6f4f00;
+  --toast-bg: #141a22;
+  --toast-ink: #ffffff;
+  --toast-act: #9dbbff;
+  --shadow: 0 1px 2px rgba(20, 26, 34, .06), 0 6px 18px rgba(20, 26, 34, .06);
+  --shadow-up: 0 -8px 24px rgba(20, 26, 34, .08);
+  --font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1318; --surface: #181e25; --surface-2: #1f262e; --ink: #e9edf2; --ink-2: #b0bac6; --muted: #818d9a; --line: #2b343e;
+    --accent: #7aa2ff; --accent-ink: #0b1220; --accent-soft: #1b2a47;
+    --rec: #ff5a4f; --rec-ink: #1a0807; --rec-soft: #3b1d1b;
+    --up: #4fcb8c; --up-soft: #15301f; --down: #f08a5d; --down-soft: #3a2218;
+    --warn-bg: #3a2f12; --warn-ink: #f2d37a;
+    --toast-bg: #e9edf2; --toast-ink: #141a22; --toast-act: #1d56d6;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+    --shadow-up: 0 -8px 24px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1318; --surface: #181e25; --surface-2: #1f262e; --ink: #e9edf2; --ink-2: #b0bac6; --muted: #818d9a; --line: #2b343e;
+  --accent: #7aa2ff; --accent-ink: #0b1220; --accent-soft: #1b2a47;
+  --rec: #ff5a4f; --rec-ink: #1a0807; --rec-soft: #3b1d1b;
+  --up: #4fcb8c; --up-soft: #15301f; --down: #f08a5d; --down-soft: #3a2218;
+  --warn-bg: #3a2f12; --warn-ink: #f2d37a;
+  --toast-bg: #e9edf2; --toast-ink: #141a22; --toast-act: #1d56d6;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .25);
+  --shadow-up: 0 -8px 24px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg);
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 10px;
+}
+.top-in, .main { max-width: 640px; margin: 0 auto; }
+.brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.brand h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1;
+  letter-spacing: .02em; text-transform: uppercase;
+}
+.brand h1 span { color: var(--accent); }
+.brand .wk { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; }
+.tabs a {
+  text-align: center; text-decoration: none; color: var(--ink-2); font-weight: 600; font-size: 14px;
+  padding: 8px 6px; border-radius: 9px;
+}
+.tabs a[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+.main {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 6px 40px;
+}
+.main.with-rec { padding-bottom: 190px; }
+
+.banner { border-radius: 12px; padding: 10px 12px; font-size: 13.5px; background: var(--warn-bg); color: var(--warn-ink); margin-bottom: 12px; }
+.banner b { font-weight: 600; }
+.banner a { color: inherit; font-weight: 600; }
+
+.eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h2.sec {
+  font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: .02em; text-transform: uppercase;
+  margin: 22px 0 10px; text-wrap: balance;
+}
+
+/* Heute: Kopf mit Datum und Trainingstag */
+.today-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 8px 0 12px; }
+.date-pick { display: flex; align-items: center; gap: 8px; }
+.date-pick label { font-family: var(--font-display); font-weight: 700; font-size: 24px; text-transform: uppercase; letter-spacing: .02em; }
+.date-pick input {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 5px 8px; font-size: 14px;
+}
+.linkbtn { background: none; border: 0; padding: 4px 2px; color: var(--accent); font-weight: 600; font-size: 13.5px; }
+.days { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  border-radius: 999px; padding: 6px 13px; font-weight: 600; font-size: 13.5px;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--up); margin-left: 6px; vertical-align: middle; }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+.ex {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.ex.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+.ex-btn {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; width: 100%; text-align: left;
+  background: none; border: 0; padding: 12px 14px;
+}
+.ex-name { font-weight: 600; font-size: 15.5px; min-width: 0; overflow-wrap: anywhere; }
+.ex-scheme { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--muted); align-self: start; }
+.rows { grid-column: 1 / -1; display: grid; grid-template-columns: 92px 1fr; gap: 3px 10px; margin-top: 6px; font-size: 13.5px; }
+.rows .dt { color: var(--muted); }
+.rows .dd { min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.sets { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: .01em; line-height: 1.15; }
+.sets.now { color: var(--ink); }
+.sets.prev { color: var(--ink-2); }
+.sets .u { font-size: 14px; color: var(--muted); font-weight: 500; margin-left: 2px; }
+.pending { color: var(--muted); font-style: italic; }
+.delta { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 7px; }
+.delta.up { background: var(--up-soft); color: var(--up); }
+.delta.down { background: var(--down-soft); color: var(--down); }
+.delta.same { background: var(--surface-2); color: var(--muted); }
+.target-tag { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 4px; }
+
+.editor { border-top: 1px solid var(--line); background: var(--surface-2); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.ed-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 14px minmax(0, 1fr) 34px; align-items: center; gap: 6px; }
+.ed-row .lbl { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.ed-row .x { text-align: center; color: var(--muted); }
+.ed-row input {
+  width: 100%; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 9px;
+  padding: 7px 9px; font-size: 15px; font-variant-numeric: tabular-nums;
+}
+.ed-row .rm { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 18px; line-height: 1; }
+.ed-head { display: grid; grid-template-columns: 52px minmax(0, 1fr) 14px minmax(0, 1fr) 34px; gap: 6px; font-size: 11.5px; color: var(--muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.ed-head span:nth-child(2), .ed-head span:nth-child(4) { padding-left: 2px; }
+.ed-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 4px; }
+.ed-said { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.btn {
+  border-radius: 10px; padding: 8px 14px; font-weight: 600; font-size: 14px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { color: var(--rec); border-color: transparent; background: transparent; margin-left: auto; }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--r); padding: 18px 16px; color: var(--ink-2); }
+.empty b { color: var(--ink); }
+.loading { color: var(--muted); padding: 16px 2px; }
+
+/* Aufnahmeleiste */
+.rec {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  background: var(--surface); border-top: 1px solid var(--line); box-shadow: var(--shadow-up);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: 10px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.rec-in { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.live {
+  min-height: 0; font-size: 14px; color: var(--ink-2); background: var(--surface-2); border-radius: 10px; padding: 8px 10px;
+  overflow-wrap: anywhere; max-height: 5.2em; overflow-y: auto;
+}
+.live .p { color: var(--muted); }
+.live .st { display: block; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--rec); margin-bottom: 2px; }
+.live .st.busy { color: var(--accent); }
+.rec-row { display: flex; align-items: center; gap: 10px; }
+.mic {
+  flex: 0 0 auto; width: 58px; height: 58px; border-radius: 50%; border: 0;
+  background: var(--rec); color: var(--rec-ink); display: grid; place-items: center;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--rec) 35%, transparent);
+}
+.mic svg { width: 26px; height: 26px; }
+.mic .sq { display: none; width: 18px; height: 18px; border-radius: 4px; background: var(--rec-ink); }
+.mic.on .sq { display: block; }
+.mic.on svg { display: none; }
+.mic.on { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rec) 45%, transparent); } 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--rec) 0%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .mic.on { animation: none; outline: 3px solid var(--rec-soft); } }
+.mic:disabled { opacity: .55; }
+.typed { flex: 1 1 auto; min-width: 0; display: flex; gap: 6px; }
+.typed input {
+  flex: 1 1 auto; min-width: 0; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px;
+  padding: 11px 12px; font-size: 15px;
+}
+.typed button { flex: 0 0 auto; border-radius: 12px; padding: 0 14px; border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.typed button:disabled { opacity: .5; }
+.hint { font-size: 12.5px; color: var(--muted); }
+
+/* Verlauf */
+.prog { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
+.prog-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px auto; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--line); }
+.prog-row:first-child { border-top: 0; }
+.prog-row .n { font-weight: 600; font-size: 14.5px; overflow-wrap: anywhere; }
+.prog-row .s { font-size: 12.5px; color: var(--muted); }
+.prog-row .v { text-align: right; }
+.prog-row .v b { display: block; font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 1.1; }
+.spark { width: 96px; height: 32px; display: block; }
+.spark .ln { fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.spark .ar { fill: var(--accent-soft); stroke: none; }
+.spark .pt { fill: var(--accent); stroke: var(--surface); stroke-width: 1.5; }
+
+.week { margin-top: 18px; }
+.week-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 8px; }
+.week-h h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: .02em; text-transform: uppercase; }
+.week-h .meta { font-size: 13px; color: var(--muted); }
+.sess { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 12px 14px; margin-bottom: 8px; }
+.sess-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 6px; }
+.sess-h b { font-weight: 600; }
+.sess-h .meta { font-size: 13px; color: var(--muted); }
+.sess-h .linkbtn { margin-left: auto; }
+.sess table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sess td { padding: 4px 0; border-top: 1px solid var(--line); vertical-align: baseline; }
+.sess tr:first-child td { border-top: 0; }
+.sess td.n { padding-right: 10px; min-width: 0; overflow-wrap: anywhere; }
+.sess td.sc { color: var(--muted); font-family: var(--font-display); font-weight: 600; font-size: 16px; padding-right: 10px; white-space: nowrap; }
+.sess td.st { text-align: right; font-family: var(--font-display); font-weight: 600; font-size: 16px; white-space: nowrap; }
+.tbl-wrap { overflow-x: auto; }
+
+/* Plan */
+.plan-box { display: flex; flex-direction: column; gap: 10px; }
+.plan-box textarea {
+  width: 100%; min-height: 220px; resize: vertical; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 12px 14px; font-size: 15px; line-height: 1.55; font-family: var(--font-body);
+}
+.plan-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.plan-status { font-size: 13.5px; color: var(--muted); }
+.days-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.day-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 12px 14px; min-width: 0; }
+.day-card h3 { margin: 0 0 6px; font-family: var(--font-display); font-weight: 700; font-size: 19px; text-transform: uppercase; letter-spacing: .02em; }
+.day-card ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.day-card li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.day-card li:first-child { border-top: 0; }
+.day-card li span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.day-card li .sc { font-family: var(--font-display); font-weight: 600; font-size: 16px; color: var(--ink-2); white-space: nowrap; }
+.day-card li .nt { display: block; font-size: 12px; color: var(--muted); }
+.example-tag { display: inline-block; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--warn-ink); background: var(--warn-bg); border-radius: 6px; padding: 2px 7px; margin-left: 8px; vertical-align: middle; }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 20;
+  bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  width: min(560px, calc(100% - 32px));
+  background: var(--toast-bg); color: var(--toast-ink); border-radius: 12px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 12px; font-size: 14px; box-shadow: var(--shadow);
+}
+.toast.low { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+.toast span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.toast button { background: none; border: 0; color: var(--toast-act); font-weight: 600; padding: 4px 2px; }
+
+@media (max-width: 420px) {
+  .rows { grid-template-columns: 78px 1fr; }
+  .prog-row { grid-template-columns: minmax(0, 1fr) 72px auto; }
+  .spark { width: 72px; }
+}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>Satz<span>buch</span></h1>
+      <div class="wk num" id="wk"></div>
+    </div>
+    <nav class="tabs" aria-label="Ansichten">
+      <a href="#heute" id="tab-heute">Heute</a>
+      <a href="#verlauf" id="tab-verlauf">Verlauf</a>
+      <a href="#plan" id="tab-plan">Plan</a>
+    </nav>
+  </div>
+</header>
+
+<main class="main" id="main">
+  <div id="banner"></div>
+
+  <section id="v-heute">
+    <div class="today-head">
+      <div class="date-pick">
+        <label for="date" id="date-label">Heute</label>
+        <input type="date" id="date">
+      </div>
+      <button class="linkbtn" id="back-today" type="button" hidden>Zurück zu heute</button>
+    </div>
+    <div class="days" id="days" role="group" aria-label="Trainingstag"></div>
+    <div class="list" id="ex-list"><div class="loading">Plan wird geladen …</div></div>
+  </section>
+
+  <section id="v-verlauf" hidden>
+    <h2 class="sec">Fortschritt</h2>
+    <div id="prog"></div>
+    <h2 class="sec">Woche für Woche</h2>
+    <div id="weeks"></div>
+  </section>
+
+  <section id="v-plan" hidden>
+    <h2 class="sec">Dein Trainingsplan</h2>
+    <form class="plan-box" id="plan-form">
+      <label class="hint" for="plan-text">Schreib deinen Plan so, wie du ihn im Kopf hast: Trainingstage als Überschrift, darunter je Zeile eine Übung mit Sätzen × Wiederholungen.</label>
+      <textarea id="plan-text" spellcheck="false" placeholder="Tag A&#10;Kniebeuge 3x5&#10;Bankdrücken 3x5&#10;Langhantelrudern 3x5&#10;&#10;Tag B&#10;Kreuzheben 1x5&#10;Schulterdrücken 3x5&#10;Klimmzüge 3x8"></textarea>
+      <div class="plan-actions">
+        <button class="btn primary" type="submit" id="plan-save">Plan speichern</button>
+        <span class="plan-status" id="plan-status"></span>
+      </div>
+    </form>
+    <h2 class="sec" id="plan-preview-h">So ist er gespeichert</h2>
+    <div id="plan-preview"></div>
+  </section>
+</main>
+
+<div class="rec" id="rec">
+  <div class="rec-in">
+    <div class="live" id="live" hidden></div>
+    <div class="rec-row">
+      <button class="mic" id="mic" type="button" aria-label="Aufnahme starten" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path></svg>
+        <span class="sq" aria-hidden="true"></span>
+      </button>
+      <form class="typed" id="typed-form">
+        <input id="typed" type="text" autocomplete="off" enterkeyhint="send" placeholder="z. B. Langhantelrudern 3x5 80 82 84 kg" aria-label="Satz eintippen">
+        <button type="submit" id="typed-send">Eintragen</button>
+      </form>
+    </div>
+    <div class="hint" id="rec-hint">Sag Übung, Schema und Gewichte, zum Beispiel „Langhantelrudern 3x5, erster Satz 80 Kilo, zweiter 82, dritter 84“.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden role="status" aria-live="polite"><span id="toast-text"></span><button type="button" id="toast-undo" hidden>Rückgängig</button></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- Hilfen ---------- */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = (n) => String(n).padStart(2, "0");
+const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseDate = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const todayISO = () => isoDate(new Date());
+const WD = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+const MON = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."];
+const shortDate = (s) => { const d = parseDate(s); return `${WD[d.getDay()]} ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.`; };
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y = t.getUTCFullYear();
+  const w = Math.ceil(((t - Date.UTC(y, 0, 1)) / 86400000 + 1) / 7);
+  return { y, w };
+}
+function weekStart(s) { const d = parseDate(s); const day = d.getDay() || 7; d.setDate(d.getDate() - day + 1); return d; }
+const norm = (s) => String(s || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]/g, "");
+function slug(s) { const v = String(s || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40); return v || "tag"; }
+const fmtKg = (v) => v == null ? "–" : String(Math.round(v * 100) / 100).replace(".", ",");
+function setsText(sets) {
+  if (!sets || !sets.length) return "";
+  if (sets.every((x) => x.kg == null)) return `${sets.map((x) => x.reps ?? "–").join(" · ")} Wdh.`;
+  return `${sets.map((x) => fmtKg(x.kg)).join(" · ")} kg`;
+}
+const fmtT = (kg) => kg >= 1000 ? `${(kg / 1000).toFixed(1).replace(".", ",")} t` : `${Math.round(kg)} kg`;
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+function bigrams(s) { const m = new Map(); for (let i = 0; i < s.length - 1; i++) { const b = s.slice(i, i + 2); m.set(b, (m.get(b) || 0) + 1); } return m; }
+function dice(a, b) {
+  if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+  const A = bigrams(a), B = bigrams(b); let inter = 0;
+  for (const [k, v] of A) inter += Math.min(v, B.get(k) || 0);
+  return (2 * inter) / (a.length - 1 + b.length - 1);
+}
+function matchName(spoken, candidates) {
+  const n = norm(spoken); if (!n) return null;
+  let best = null, score = 0;
+  for (const c of candidates) {
+    const m = norm(c); if (!m) continue;
+    let s = m === n ? 1 : (m.includes(n) || n.includes(m)) ? 0.4 + 0.6 * Math.min(m.length, n.length) / Math.max(m.length, n.length) : dice(m, n);
+    if (s > score) { score = s; best = c; }
+  }
+  return score >= 0.6 ? best : null;
+}
+const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+/* ---------- Zustand ---------- */
+const S = {
+  db: null, sample: null, dict: null,
+  ready: { plan: false, sessions: false },
+  plan: null,
+  sessions: new Map(),
+  view: "heute",
+  date: todayISO(),
+  dayId: null,
+  sel: null,
+  open: null,
+  draft: null,
+  noWrite: false,
+  memoryOnly: false,
+  stale: false,
+  sampleOff: false,
+  rec: { on: false, final: "", partial: "", busy: false, noLang: false },
+};
+
+/* ---------- Plan-Zugriffe ---------- */
+const planDays = () => (S.plan && Array.isArray(S.plan.days) ? S.plan.days : []);
+const dayById = (id) => planDays().find((d) => d.id === id) || null;
+const allPlanNames = () => planDays().flatMap((d) => d.exercises.map((e) => e.name));
+const sessionList = () => [...S.sessions.entries()].map(([id, d]) => ({ id, ...d })).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.updatedAt || "").localeCompare(a.updatedAt || "")));
+const sessionId = (date, dayId) => `${date}_${dayId}`;
+const schemeOf = (e) => e.sets ? `${e.sets}×${e.reps ?? "?"}` : (e.reps ? `${e.reps} Wdh.` : "");
+function knownNames() {
+  const set = new Set(allPlanNames());
+  for (const s of S.sessions.values()) for (const e of s.entries || []) set.add(e.exercise);
+  return [...set];
+}
+
+function autoDayId() {
+  const days = planDays(); if (!days.length) return null;
+  const onDate = sessionList().filter((s) => s.date === S.date && dayById(s.dayId));
+  if (onDate.length) return onDate[0].dayId;
+  const before = sessionList().filter((s) => s.date < S.date && dayById(s.dayId));
+  if (!before.length) return days[0].id;
+  const i = days.findIndex((d) => d.id === before[0].dayId);
+  return days[(i + 1) % days.length].id;
+}
+const currentDayId = () => (S.dayId && dayById(S.dayId)) ? S.dayId : autoDayId();
+function currentSession() {
+  const dayId = currentDayId(); if (!dayId) return null;
+  const id = sessionId(S.date, dayId);
+  return { id, dayId, data: S.sessions.get(id) || null };
+}
+function lastTimeFor(name, beforeDate) {
+  const n = norm(name);
+  for (const s of sessionList()) {
+    if (s.date >= beforeDate) continue;
+    const e = (s.entries || []).find((x) => norm(x.exercise) === n);
+    if (e && e.sets && e.sets.length) return { date: s.date, entry: e };
+  }
+  return null;
+}
+const topKg = (e) => { const v = (e.sets || []).map((s) => s.kg).filter((x) => typeof x === "number"); return v.length ? Math.max(...v) : null; };
+const volume = (e) => (e.sets || []).reduce((a, s) => a + ((+s.kg || 0) * (+s.reps || 0)), 0);
+
+/* ---------- Speichern ---------- */
+const queues = new Map();
+function writeDoc(path, body) {
+  const prev = queues.get(path) || Promise.resolve();
+  const next = prev.catch(() => {}).then(async () => {
+    if (!S.db) return;
+    const ref = S.db.doc(path);
+    if (body === null) await ref.delete(); else await ref.set(body);
+  });
+  queues.set(path, next);
+  return next.catch((e) => {
+    if (e && e.code === "invalid_argument") { S.noWrite = true; renderBanner(); }
+    else if (e && e.code === "quota_exceeded") toast("Der Speicher ist voll. Lösche alte Einheiten im Verlauf.");
+    else toast("Speichern hat nicht geklappt. Prüf deine Verbindung und versuch es noch einmal.");
+    throw e;
+  });
+}
+function putSession(id, body) {
+  if (body) S.sessions.set(id, body); else S.sessions.delete(id);
+  render();
+  return writeDoc(`sessions/${id}`, body);
+}
+
+/* ---------- Auswertung: lokal ---------- */
+const NUMW = { eins: 1, zwei: 2, drei: 3, vier: 4, "fünf": 5, sechs: 6, sieben: 7, acht: 8, neun: 9, zehn: 10, elf: 11, "zwölf": 12, dreizehn: 13, vierzehn: 14, "fünfzehn": 15, sechzehn: 16, siebzehn: 17, achtzehn: 18, neunzehn: 19, zwanzig: 20 };
+const STOP = new Set("kilo kilos kg kilogramm satz sätze saetze runde und dann mit je à a bei jetzt als nächstes nächste naechste übung uebung wiederholungen wiederholung wdh reps alle jeweils das die der den war waren ich habe hab gemacht heute auf für also okay ok ähm äh noch plus bis zu von pro gewicht sätzen".split(" "));
+function localParse(text, hint) {
+  let t = " " + String(text).toLowerCase() + " ";
+  t = t.replace(/[–—]/g, " ").replace(/\b(eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf|dreizehn|vierzehn|fünfzehn|sechzehn|siebzehn|achtzehn|neunzehn|zwanzig)\b/g, (w) => String(NUMW[w]));
+  t = t.replace(/(\d+)\s*(?:,|komma|punkt)\s*(\d+)/g, "$1.$2").replace(/(\d+)\s*einhalb/g, (m, a) => String(+a + 0.5));
+  t = t.replace(/\b(?:erste|zweite|dritte|vierte|fünfte|sechste|siebte|achte|letzte)[nrms]?\b(?:\s+(?:satz|runde))?/g, " | ");
+  t = t.replace(/\b(?:satz|runde)\s+\d+\b/g, " | ").replace(/\b\d+\.\s*(?:satz|runde)\b/g, " | ");
+  t = t.replace(/(\d+)\s*sätze\s*(?:à|a|zu|mit|je|von)?\s*(\d+)/g, " §$1x$2§ ");
+  t = t.replace(/(\d+(?:\.\d+)?)\s*(?:x|×|mal)\s*(\d+)/g, (m, a, b) => (+a <= 10 ? ` §${a}x${b}§ ` : ` ${a} kg ${b} wdh `));
+  const toks = t.match(/§\d+x\d+§|\d+(?:\.\d+)?|[a-zäöüß]+|\|/g) || [];
+  const entries = []; let cur = null;
+  const fresh = () => ({ words: [], scheme: null, kg: [], reps: {}, note: [] });
+  const has = (c) => c && (c.scheme || c.kg.length);
+  for (let i = 0; i < toks.length; i++) {
+    const k = toks[i];
+    if (k === "|") continue;
+    if (k[0] === "§") { const [a, b] = k.slice(1, -1).split("x").map(Number); if (!cur || cur.scheme) { if (has(cur)) entries.push(cur); cur = cur && !has(cur) ? cur : fresh(); } cur.scheme = { sets: a, reps: b }; continue; }
+    if (/^\d/.test(k)) {
+      const v = +k, nx = toks[i + 1] || "";
+      if (!cur) cur = fresh();
+      if (/^(wiederholungen|wiederholung|wdh|reps)$/.test(nx)) { cur.reps[Math.max(0, cur.kg.length - 1)] = v; i++; continue; }
+      cur.kg.push(v);
+      if (/^(kilo|kilos|kg|kilogramm)$/.test(nx)) i++;
+      continue;
+    }
+    if (STOP.has(k)) continue;
+    if (has(cur)) {
+      const looksName = toks.slice(i + 1, i + 4).some((x) => x[0] === "§" || /^\d/.test(x));
+      if (looksName) { entries.push(cur); cur = fresh(); cur.words.push(k); }
+      else cur.note.push(k);
+    } else { if (!cur) cur = fresh(); cur.words.push(k); }
+  }
+  if (has(cur)) entries.push(cur);
+  const names = knownNames();
+  return entries.map((c) => {
+    const spoken = c.words.join(" ");
+    const name = (spoken && matchName(spoken, names)) || (spoken ? cap(spoken) : hint) || "Übung";
+    const plan = planExercise(name);
+    const nSets = c.scheme ? c.scheme.sets : (plan && plan.sets) || c.kg.length || 1;
+    const defReps = c.scheme ? c.scheme.reps : (plan && /^\d+$/.test(String(plan.reps)) ? +plan.reps : null);
+    let kg = c.kg.slice();
+    if (kg.length === 1 && nSets > 1) kg = Array(nSets).fill(kg[0]);
+    if (!kg.length) kg = Array(nSets).fill(null);
+    const sets = kg.map((v, idx) => ({ kg: v, reps: c.reps[idx] ?? defReps }));
+    return { exercise: name, scheme: c.scheme ? `${c.scheme.sets}×${c.scheme.reps}` : (plan ? schemeOf(plan) : ""), sets, note: c.note.join(" ") };
+  });
+}
+function planExercise(name) { const n = norm(name); for (const d of planDays()) for (const e of d.exercises) if (norm(e.name) === n) return e; return null; }
+
+/* ---------- Auswertung: Claude ---------- */
+async function claudeParse(text, hint) {
+  const day = dayById(currentDayId());
+  const planLines = day ? day.exercises.map((e) => `- ${e.name} | ${schemeOf(e) || "ohne Schema"}`).join("\n") : "(kein Plan)";
+  const others = knownNames().filter((n) => !day || !day.exercises.some((e) => norm(e.name) === norm(n)));
+  const prompt = `Du wandelst eine gesprochene Notiz aus dem Krafttraining in JSON um. Die Notiz kommt aus einer Spracherkennung und kann Wörter falsch trennen oder verhören.
+
+Übungen im heutigen Plan (Name | Sätze×Wiederholungen):
+${planLines}
+${others.length ? "Weitere bekannte Übungen: " + others.join(", ") + "\n" : ""}${hint ? `Wird keine Übung genannt, gehört alles zu: "${hint}".\n` : ""}
+Regeln:
+- Ordne gesprochene Namen der passenden bekannten Übung zu und übernimm deren Schreibweise ("Langhantel rudern" = "Langhantelrudern"). Unbekannte Übungen schreibst du sauber aus.
+- "3x5", "3 mal 5", "drei mal fünf", "3 Sätze à 5" heißt 3 Sätze mit je 5 Wiederholungen.
+- Jeder Satz hat kg (Zahl; "82,5" oder "82 einhalb" = 82.5; ohne Zusatzgewicht null) und reps (Zahl). Fehlen die Wiederholungen eines Satzes, nimm sie aus dem genannten Schema, sonst aus dem Plan.
+- "alle Sätze 80 Kilo" heißt: jeder Satz 80. Wird nur ein Gewicht und ein Schema genannt, gilt das Gewicht für alle Sätze.
+- Weitere Bemerkungen (z. B. "ging leicht", "Rücken gezwickt") kurz in note, sonst "".
+- scheme ist das genannte Schema als "3x5", sonst das aus dem Plan, sonst "".
+
+Antworte nur mit JSON in genau dieser Form:
+{"entries":[{"exercise":"Langhantelrudern","scheme":"3x5","sets":[{"kg":80,"reps":5},{"kg":82,"reps":5},{"kg":84,"reps":5}],"note":""}]}
+
+Notiz:
+"""${text}"""`;
+  const out = await S.sample.json(prompt, { modelTier: "quick" });
+  const arr = out && Array.isArray(out.entries) ? out.entries : null;
+  if (!arr) throw { code: "invalid_json" };
+  const names = knownNames();
+  return arr.map((e) => {
+    const raw = String(e.exercise || hint || "Übung").trim();
+    const name = matchName(raw, names) || cap(raw);
+    const sets = (Array.isArray(e.sets) ? e.sets : []).map((s) => ({
+      kg: s && s.kg != null && isFinite(+s.kg) ? +s.kg : null,
+      reps: s && s.reps != null && isFinite(+s.reps) ? Math.round(+s.reps) : null,
+    })).slice(0, 20);
+    return { exercise: name, scheme: String(e.scheme || "").replace(/^(\d+)\s*[x×]\s*/i, "$1×"), sets, note: String(e.note || "").slice(0, 200) };
+  }).filter((e) => e.sets.length);
+}
+
+function targetHint() {
+  if (S.sel) return S.sel;
+  const day = dayById(currentDayId()); if (!day) return null;
+  const cs = currentSession(); const done = new Set(((cs && cs.data && cs.data.entries) || []).map((e) => norm(e.exercise)));
+  const next = day.exercises.find((e) => !done.has(norm(e.name)));
+  return next ? next.name : null;
+}
+
+async function handleText(text) {
+  text = String(text || "").trim();
+  if (!text) return;
+  if (S.noWrite) { toast("Du kannst hier nur lesen. Eintragen darf nur, wem das Satzbuch gehört."); return; }
+  const cs = currentSession();
+  if (!cs) { toast("Lege zuerst unter „Plan“ deinen Trainingsplan an."); return; }
+  const hint = targetHint();
+  S.rec.busy = true; renderLive();
+  let entries = null;
+  try {
+    if (S.sample && !S.sampleOff) {
+      try { entries = await claudeParse(text, hint); }
+      catch (e) {
+        if (e && ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code)) S.sampleOff = true;
+        entries = null;
+      }
+    }
+    if (!entries || !entries.length) entries = localParse(text, hint);
+  } finally { S.rec.busy = false; }
+  if (!entries.length) { renderLive(); toast("Ich habe keine Gewichte erkannt. Sag zum Beispiel „Bankdrücken 3x5, 60, 62, 64 Kilo“."); return; }
+  await addEntries(entries, text);
+}
+
+async function addEntries(entries, said) {
+  const cs = currentSession();
+  const day = dayById(cs.dayId);
+  const prevBody = cs.data ? JSON.parse(JSON.stringify(cs.data)) : null;
+  const now = new Date().toISOString();
+  const body = prevBody ? JSON.parse(JSON.stringify(prevBody)) : { date: S.date, dayId: cs.dayId, dayName: day ? day.name : "", entries: [], createdAt: now };
+  const touched = [];
+  for (const e of entries) {
+    const n = norm(e.exercise);
+    const i = body.entries.findIndex((x) => norm(x.exercise) === n);
+    const add = { id: uid(), exercise: e.exercise, scheme: e.scheme || "", sets: e.sets, note: e.note || "", said: said || "", at: now };
+    if (i >= 0) {
+      const old = body.entries[i];
+      if (!e.scheme && e.sets.length === 1) { old.sets = old.sets.concat(e.sets); old.said = [old.said, said].filter(Boolean).join(" · "); old.at = now; touched.push(`${old.exercise} Satz ${old.sets.length}`); }
+      else { body.entries[i] = add; touched.push(`${e.exercise} aktualisiert`); }
+    } else { body.entries.push(add); touched.push(e.exercise); }
+  }
+  body.updatedAt = now;
+  S.sel = null; S.rec.final = ""; S.rec.partial = "";
+  renderLive();
+  try {
+    await putSession(cs.id, body);
+    toast(`Eingetragen: ${touched.join(", ")}`, async () => { try { await putSession(cs.id, prevBody); toast("Rückgängig gemacht."); } catch (_) {} });
+  } catch (_) { /* Meldung kommt aus writeDoc */ }
+}
+
+/* ---------- Diktat ---------- */
+function micClick() {
+  const d = S.dict; if (!d) return;
+  if (S.rec.on || d.active()) { d.stop().catch(() => {}); return; }
+  if (S.noWrite) { toast("Du kannst hier nur lesen."); return; }
+  if (!currentSession()) { toast("Lege zuerst unter „Plan“ deinen Trainingsplan an."); return; }
+  S.rec.final = ""; S.rec.partial = ""; S.rec.on = true; renderLive();
+  d.start(S.rec.noLang ? undefined : { language: "de" }).catch((e) => {
+    S.rec.on = false;
+    const c = e && e.code;
+    if (c === "not_granted") { hideMic("Das Mikrofon ist für diese Seite aus. Tipp deine Sätze unten ein oder nutz die Diktiertaste deiner Tastatur."); }
+    else if (c === "unavailable") {
+      if (!S.rec.noLang) { S.rec.noLang = true; toast("Deutsch wird hier nicht erkannt. Tipp noch einmal auf das Mikrofon, dann in deiner Systemsprache."); }
+      else hideMic("Spracheingabe ist hier nicht verfügbar. Tipp deine Sätze ein oder nutz die Diktiertaste deiner Tastatur.");
+    }
+    else if (c === "dismissed" || c === "stopped") { /* nichts */ }
+    else if (c === "rate_limited") toast("Gerade laufen zu viele Aufnahmen. Versuch es gleich noch einmal.");
+    else toast("Die Aufnahme ist nicht gestartet. Tipp noch einmal auf das Mikrofon.");
+    renderLive();
+  });
+}
+function hideMic(msg) { S.dict = null; $("mic").hidden = true; setHint(msg); renderLive(); }
+function setHint(msg) { $("rec-hint").textContent = msg; }
+
+/* ---------- Anzeige ---------- */
+function setsHtml(sets, cls) {
+  if (!sets || !sets.length) return "";
+  const kgs = sets.map((s) => s.kg);
+  if (kgs.every((v) => v == null)) return `<span class="sets ${cls} num">${sets.map((s) => s.reps ?? "–").join(" · ")}<span class="u">Wdh.</span></span>`;
+  const allSameReps = sets.every((s) => s.reps === sets[0].reps);
+  const parts = sets.map((s) => `${fmtKg(s.kg)}${!allSameReps && s.reps != null ? `<span class="u">×${s.reps}</span>` : ""}`);
+  const unit = kgs.some((v) => v != null) ? `<span class="u">kg</span>` : "";
+  const reps = allSameReps && sets[0].reps != null ? `<span class="u">× ${sets[0].reps}</span>` : "";
+  return `<span class="sets ${cls} num">${parts.join(" · ")}${unit}${reps ? " " + reps : ""}</span>`;
+}
+function deltaHtml(now, prev) {
+  const a = topKg(now), b = prev ? topKg(prev) : null;
+  if (a == null || b == null) return "";
+  const d = Math.round((a - b) * 100) / 100;
+  if (d > 0) return `<span class="delta up num">▲ +${fmtKg(d)} kg</span>`;
+  if (d < 0) return `<span class="delta down num">▼ ${fmtKg(d)} kg</span>`;
+  return `<span class="delta same">gleich</span>`;
+}
+
+function renderHeader() {
+  const { w } = isoWeek(parseDate(todayISO()));
+  $("wk").textContent = `KW ${w}`;
+  for (const v of ["heute", "verlauf", "plan"]) {
+    const a = $("tab-" + v);
+    if (S.view === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    $("v-" + v).hidden = S.view !== v;
+  }
+  $("rec").hidden = S.view !== "heute";
+  $("main").classList.toggle("with-rec", S.view === "heute");
+  $("toast").classList.toggle("low", S.view !== "heute");
+}
+
+function renderBanner() {
+  const b = [];
+  if (S.memoryOnly) b.push("<b>Nicht gespeichert.</b> Öffne das Satzbuch angemeldet in Claude, damit deine Einträge bleiben.");
+  else if (S.noWrite) b.push("<b>Nur lesen.</b> Eintragen kann nur, wem das Satzbuch gehört.");
+  if (S.view === "heute" && S.plan && S.plan.example) b.push('<b>Beispielplan.</b> Tipp unter <a href="#plan">Plan</a> deinen eigenen ein, dann ersetzt er das Beispiel.');
+  if (S.stale) b.push("Deine Daten sind noch nicht erreichbar. Was du siehst, ist eventuell nicht aktuell.");
+  $("banner").innerHTML = b.map((x) => `<div class="banner">${x}</div>`).join("");
+}
+
+function renderHeute() {
+  const isToday = S.date === todayISO();
+  $("date-label").textContent = isToday ? "Heute" : shortDate(S.date);
+  const di = $("date"); if (di.value !== S.date) di.value = S.date;
+  $("back-today").hidden = isToday;
+
+  const days = planDays();
+  const dayId = currentDayId();
+  const doneIds = new Set(sessionList().filter((s) => s.date === S.date && (s.entries || []).length).map((s) => s.dayId));
+  $("days").innerHTML = days.map((d) => `<button type="button" class="chip" data-day="${esc(d.id)}" aria-pressed="${d.id === dayId}">${esc(d.name)}${doneIds.has(d.id) ? '<span class="dot" aria-label="eingetragen"></span>' : ""}</button>`).join("");
+
+  const list = $("ex-list");
+  if (!S.ready.plan) { list.innerHTML = `<div class="loading">Plan wird geladen …</div>`; return; }
+  if (!days.length) {
+    list.innerHTML = `<div class="empty"><b>Noch kein Trainingsplan.</b><br>Tipp ihn einmal unter <a href="#plan">Plan</a> ein. Danach sprichst du hier nach jeder Übung deine Sätze ein.</div>`;
+    return;
+  }
+  const cs = currentSession();
+  const entries = (cs.data && cs.data.entries) || [];
+  const day = dayById(dayId);
+  const planned = day.exercises.map((e) => ({ name: e.name, scheme: schemeOf(e), plan: e }));
+  const extra = entries.filter((x) => !planned.some((p) => norm(p.name) === norm(x.exercise))).map((x) => ({ name: x.exercise, scheme: x.scheme, plan: null }));
+  const hint = targetHint();
+
+  const card = (p) => {
+    const n = norm(p.name);
+    const entry = entries.find((x) => norm(x.exercise) === n) || null;
+    const last = lastTimeFor(p.name, S.date);
+    const isOpen = S.open === n;
+    const isSel = S.sel && norm(S.sel) === n;
+    const isTarget = !S.rec.on && hint && norm(hint) === n;
+    const scheme = (entry && entry.scheme) || p.scheme;
+    return `<article class="ex${isSel ? " sel" : ""}">
+      <button type="button" class="ex-btn" data-ex="${esc(p.name)}" aria-expanded="${isOpen}">
+        <span class="ex-name">${esc(p.name)}</span>
+        <span class="ex-scheme num">${esc(scheme || "")}</span>
+        <span class="rows">
+          <span class="dt">${last ? "Letztes Mal" : "Zuletzt"}</span>
+          <span class="dd">${last ? `${setsHtml(last.entry.sets, "prev")} <span class="hint">${shortDate(last.date)}</span>` : `<span class="pending">noch nie</span>`}</span>
+          <span class="dt">${isToday ? "Heute" : shortDate(S.date)}</span>
+          <span class="dd">${entry ? `${setsHtml(entry.sets, "now")} ${deltaHtml(entry, last && last.entry)}` : `<span class="pending">offen</span>`}</span>
+        </span>
+        ${isTarget && !entry ? `<span class="target-tag">${isSel ? "Ausgewählt" : "Als Nächstes dran"}. Du kannst einfach die Gewichte sagen.</span>` : ""}
+      </button>
+      ${isOpen ? editorHtml(p, entry, last) : ""}
+    </article>`;
+  };
+  list.innerHTML = planned.map(card).join("") + (extra.length ? `<div class="eyebrow" style="margin-top:10px">Zusätzlich</div>` + extra.map(card).join("") : "");
+}
+
+function editorHtml(p, entry, last) {
+  if (!S.draft || S.draft.key !== norm(p.name)) {
+    const base = entry ? entry.sets : (last ? last.entry.sets.map((s) => ({ kg: null, reps: s.reps, ph: s.kg })) : Array.from({ length: (p.plan && p.plan.sets) || 3 }, () => ({ kg: null, reps: p.plan && /^\d+$/.test(String(p.plan.reps)) ? +p.plan.reps : null })));
+    S.draft = { key: norm(p.name), sets: base.map((s, i) => ({ kg: s.kg, reps: s.reps, ph: s.ph ?? (last && last.entry.sets[i] ? last.entry.sets[i].kg : null) })) };
+  }
+  const rows = S.draft.sets.map((s, i) => `<div class="ed-row">
+      <span class="lbl">Satz ${i + 1}</span>
+      <input id="ed-kg-${i}" inputmode="decimal" data-i="${i}" data-f="kg" value="${s.kg == null ? "" : esc(fmtKg(s.kg))}" placeholder="${s.ph != null ? esc(fmtKg(s.ph)) : "kg"}" aria-label="Satz ${i + 1} Gewicht in kg">
+      <span class="x">×</span>
+      <input id="ed-reps-${i}" inputmode="numeric" data-i="${i}" data-f="reps" value="${s.reps == null ? "" : s.reps}" placeholder="Wdh." aria-label="Satz ${i + 1} Wiederholungen">
+      <button type="button" class="rm" data-act="rm-set" data-i="${i}" aria-label="Satz ${i + 1} entfernen">×</button>
+    </div>`).join("");
+  return `<div class="editor">
+    <div class="ed-head"><span></span><span>kg</span><span></span><span>Wdh.</span><span></span></div>
+    ${rows}
+    <div class="ed-actions">
+      <button type="button" class="btn" data-act="add-set">+ Satz</button>
+      <button type="button" class="btn primary" data-act="save" data-ex="${esc(p.name)}">Speichern</button>
+      ${entry ? `<button type="button" class="btn danger" data-act="del" data-ex="${esc(p.name)}">Eintrag löschen</button>` : ""}
+    </div>
+    ${entry && entry.said ? `<div class="ed-said">Gesagt: „${esc(entry.said)}“</div>` : ""}
+    ${entry && entry.note ? `<div class="ed-said">Notiz: ${esc(entry.note)}</div>` : ""}
+  </div>`;
+}
+
+function renderLive() {
+  const el = $("live");
+  const r = S.rec;
+  if (r.busy) { el.hidden = false; el.innerHTML = `<span class="st busy">Wird ausgewertet …</span>${esc(r.final)}`; }
+  else if (r.on) {
+    el.hidden = false;
+    const t = (r.final + (r.partial ? " " : "")).trim();
+    el.innerHTML = `<span class="st">Ich höre zu · zum Beenden tippen</span>${esc(t)}${r.partial ? ` <span class="p">${esc(r.partial)}</span>` : ""}${!t && !r.partial ? `<span class="p">${esc(targetHint() ? "Zum Beispiel: " + targetHint() + " 3x5, 80, 82, 84 Kilo" : "Sprich jetzt …")}</span>` : ""}`;
+    el.scrollTop = el.scrollHeight;
+  } else { el.hidden = true; el.innerHTML = ""; }
+  const mic = $("mic");
+  mic.classList.toggle("on", r.on);
+  mic.setAttribute("aria-label", r.on ? "Aufnahme beenden" : "Aufnahme starten");
+  mic.disabled = r.busy;
+  $("typed-send").disabled = r.busy;
+}
+
+function renderVerlauf() {
+  const list = sessionList().filter((s) => (s.entries || []).length);
+  const prog = $("prog"), weeks = $("weeks");
+  if (!S.ready.sessions) { prog.innerHTML = `<div class="loading">Verlauf wird geladen …</div>`; weeks.innerHTML = ""; return; }
+  if (!list.length) {
+    prog.innerHTML = `<div class="empty"><b>Noch keine Einheiten.</b><br>Sobald du unter „Heute“ die ersten Sätze einsprichst, siehst du hier je Übung, wie sich dein schwerster Satz entwickelt.</div>`;
+    weeks.innerHTML = "";
+    return;
+  }
+  // Fortschritt je Übung
+  const order = allPlanNames();
+  const byEx = new Map();
+  for (const s of list.slice().reverse()) for (const e of s.entries) {
+    const t = topKg(e); if (t == null) continue;
+    const k = norm(e.exercise);
+    if (!byEx.has(k)) byEx.set(k, { name: e.exercise, pts: [] });
+    byEx.get(k).pts.push({ date: s.date, kg: t });
+  }
+  const rank = (n) => { const i = order.findIndex((o) => norm(o) === norm(n)); return i < 0 ? 999 : i; };
+  const rows = [...byEx.values()].sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
+  prog.innerHTML = rows.length ? `<div class="prog">${rows.map((r) => {
+    const pts = r.pts.slice(-12);
+    const first = pts[0], lastP = pts[pts.length - 1];
+    const d = Math.round((lastP.kg - first.kg) * 100) / 100;
+    return `<div class="prog-row">
+      <div><div class="n">${esc(r.name)}</div><div class="s num">${pts.length > 1 ? `${d > 0 ? "+" : ""}${fmtKg(d)} kg seit ${shortDate(first.date)}` : `erste Einheit ${shortDate(first.date)}`}</div></div>
+      ${spark(pts.map((p) => p.kg))}
+      <div class="v"><b class="num">${fmtKg(lastP.kg)}</b><span class="hint">kg Top-Satz</span></div>
+    </div>`;
+  }).join("")}</div>` : `<div class="empty">Noch keine Gewichte eingetragen.</div>`;
+
+  // Wochen
+  const groups = new Map();
+  for (const s of list) {
+    const ws = isoDate(weekStart(s.date));
+    if (!groups.has(ws)) groups.set(ws, []);
+    groups.get(ws).push(s);
+  }
+  weeks.innerHTML = [...groups.entries()].map(([ws, ss]) => {
+    const start = parseDate(ws), end = new Date(start); end.setDate(end.getDate() + 6);
+    const { w } = isoWeek(start);
+    const vol = ss.reduce((a, s) => a + s.entries.reduce((b, e) => b + volume(e), 0), 0);
+    const range = start.getMonth() === end.getMonth() ? `${start.getDate()}.–${end.getDate()}. ${MON[end.getMonth()]}` : `${start.getDate()}. ${MON[start.getMonth()]} – ${end.getDate()}. ${MON[end.getMonth()]}`;
+    return `<section class="week">
+      <div class="week-h"><h3 class="num">KW ${w} · ${range}</h3><span class="meta num">${ss.length} ${ss.length === 1 ? "Einheit" : "Einheiten"}${vol ? ` · ${fmtT(vol)} bewegt` : ""}</span></div>
+      ${ss.map((s) => `<div class="sess">
+        <div class="sess-h"><b>${shortDate(s.date)}</b><span class="meta">${esc(s.dayName || "")}</span><button type="button" class="linkbtn" data-open="${esc(s.id)}">Bearbeiten</button></div>
+        <div class="tbl-wrap"><table><tbody>${s.entries.map((e) => `<tr><td class="n">${esc(e.exercise)}</td><td class="sc num">${esc(e.scheme || "")}</td><td class="st num">${esc(setsText(e.sets))}</td></tr>`).join("")}</tbody></table></div>
+      </div>`).join("")}
+    </section>`;
+  }).join("");
+}
+function spark(vals) {
+  const W = 96, H = 32, P = 4;
+  if (vals.length === 1) return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><circle class="pt" cx="${W - P}" cy="${H / 2}" r="3"></circle></svg>`;
+  const min = Math.min(...vals), max = Math.max(...vals), span = max - min || 1;
+  const xs = vals.map((_, i) => P + (i * (W - 2 * P)) / (vals.length - 1));
+  const ys = vals.map((v) => H - P - ((v - min) / span) * (H - 2 * P));
+  const line = xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(" ");
+  const area = `M${xs[0].toFixed(1)},${H - P} L${line.split(" ").join(" L")} L${xs[xs.length - 1].toFixed(1)},${H - P} Z`;
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><path class="ar" d="${area}"></path><polyline class="ln" points="${line}"></polyline><circle class="pt" cx="${xs[xs.length - 1].toFixed(1)}" cy="${ys[ys.length - 1].toFixed(1)}" r="3"></circle></svg>`;
+}
+
+function renderPlan() {
+  const ta = $("plan-text");
+  if (S.plan && !S.plan.example && !ta.dataset.dirty && document.activeElement !== ta) ta.value = S.plan.raw || "";
+  const prev = $("plan-preview");
+  const days = planDays();
+  $("plan-preview-h").hidden = !days.length;
+  prev.innerHTML = days.length ? `<div class="days-grid">${days.map((d) => `<div class="day-card"><h3>${esc(d.name)}${S.plan.example ? '<span class="example-tag">Beispiel</span>' : ""}</h3><ol>${d.exercises.map((e) => `<li><span>${esc(e.name)}${e.note ? `<span class="nt">${esc(e.note)}</span>` : ""}</span><span class="sc num">${esc(schemeOf(e))}</span></li>`).join("")}</ol></div>`).join("")}</div>` : "";
+  if (S.plan && S.plan.example && !$("plan-status").textContent) $("plan-status").textContent = "Unten steht ein Beispielplan. Tipp oben deinen eigenen ein und speichere, dann ersetzt er das Beispiel.";
+}
+
+function render() {
+  renderHeader();
+  renderBanner();
+  if (S.view === "heute") {
+    const active = document.activeElement;
+    const focusId = active && active.id && active.closest && active.closest("#ex-list") ? active.id : null;
+    renderHeute();
+    if (focusId && $(focusId)) $(focusId).focus();
+  }
+  if (S.view === "verlauf") renderVerlauf();
+  if (S.view === "plan") renderPlan();
+  renderLive();
+}
+
+/* ---------- Plan einlesen ---------- */
+function localPlanParse(raw) {
+  const days = []; let cur = null;
+  for (let line of raw.split(/\r?\n/)) {
+    line = line.replace(/^\s*(?:\d+[.)]|[-–•*·])\s*/, "").trim();
+    if (!line) continue;
+    const m = line.match(/^(.*?)[\s:,-]*(\d+)\s*(?:x|×|mal|sätze\s*(?:à|a|zu|mit|je)?)\s*(\d+(?:\s*[-–]\s*\d+)?|max|amrap)\b\s*(?:wdh\.?|wiederholungen|reps)?[\s,;:-]*(.*)$/i);
+    if (m && m[1].trim()) {
+      if (!cur) { cur = { name: "Training", exercises: [] }; days.push(cur); }
+      cur.exercises.push({ name: cap(m[1].trim().replace(/[:\-–,]+$/, "").trim()), sets: +m[2], reps: m[3].replace(/\s/g, "").replace("–", "-"), note: m[4].trim() });
+    } else if (line.length <= 40 && (/:$/.test(line) || !cur || /^(tag|day|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|push|pull|beine|legs|upper|lower|ober|unter|ganz)/i.test(line))) {
+      cur = { name: line.replace(/:$/, "").trim(), exercises: [] }; days.push(cur);
+    } else {
+      if (!cur) { cur = { name: "Training", exercises: [] }; days.push(cur); }
+      cur.exercises.push({ name: cap(line), sets: null, reps: null, note: "" });
+    }
+  }
+  return days.filter((d) => d.exercises.length);
+}
+async function claudePlanParse(raw) {
+  const prompt = `Wandle diesen Trainingsplan für das Krafttraining in JSON um.
+- Gruppiere nach Trainingstagen (z. B. "Tag A", "Montag", "Push"). Gibt es keine Tage, nimm einen Tag "Training".
+- Für jede Übung: name (sauber geschrieben, deutsch wie im Plan), sets (Zahl oder null), reps (Text wie "5", "8-10", "max" oder null), note (Rest wie Pausenzeit oder Startgewicht, sonst "").
+- Erfinde keine Übungen, lass keine weg.
+Antworte nur mit JSON in genau dieser Form:
+{"days":[{"name":"Tag A","exercises":[{"name":"Kniebeuge","sets":3,"reps":"5","note":""}]}]}
+
+Plan:
+"""${raw}"""`;
+  const out = await S.sample.json(prompt, { modelTier: "quick" });
+  if (!out || !Array.isArray(out.days)) throw { code: "invalid_json" };
+  return out.days.map((d) => ({
+    name: String(d.name || "Training").slice(0, 40),
+    exercises: (Array.isArray(d.exercises) ? d.exercises : []).map((e) => ({
+      name: String(e.name || "").trim().slice(0, 80),
+      sets: e.sets != null && isFinite(+e.sets) ? Math.round(+e.sets) : null,
+      reps: e.reps != null && String(e.reps).trim() ? String(e.reps).trim().slice(0, 12) : null,
+      note: String(e.note || "").slice(0, 120),
+    })).filter((e) => e.name),
+  })).filter((d) => d.exercises.length);
+}
+async function savePlan(ev) {
+  ev.preventDefault();
+  const raw = $("plan-text").value.trim();
+  const st = $("plan-status");
+  if (!raw) { st.textContent = "Schreib zuerst deinen Plan ins Feld."; return; }
+  if (S.noWrite) { st.textContent = "Nur lesen: Den Plan ändert nur, wem das Satzbuch gehört."; return; }
+  const btn = $("plan-save"); btn.disabled = true; st.textContent = "Plan wird gelesen …";
+  let days = null;
+  try {
+    if (S.sample && !S.sampleOff) {
+      try { days = await claudePlanParse(raw); }
+      catch (e) { if (e && ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code)) S.sampleOff = true; days = null; }
+    }
+    if (!days || !days.length) days = localPlanParse(raw);
+    if (!days.length) { st.textContent = "Ich habe keine Übungen erkannt. Schreib je Zeile eine Übung, zum Beispiel „Kniebeuge 3x5“."; return; }
+    const used = new Set();
+    for (const d of days) { let id = slug(d.name), k = 2; while (used.has(id)) id = `${slug(d.name)}-${k++}`; used.add(id); d.id = id; }
+    const body = { raw, days, updatedAt: new Date().toISOString() };
+    S.plan = body; S.dayId = null; S.draft = null; S.open = null;
+    delete $("plan-text").dataset.dirty;
+    render();
+    await writeDoc("plan/current", body);
+    st.textContent = `Gespeichert: ${days.length} ${days.length === 1 ? "Trainingstag" : "Trainingstage"}, ${days.reduce((a, d) => a + d.exercises.length, 0)} Übungen.`;
+  } catch (_) {
+    st.textContent = "Speichern hat nicht geklappt. Versuch es noch einmal.";
+  } finally { btn.disabled = false; }
+}
+
+/* ---------- Editor ---------- */
+function readDraftInputs() {
+  if (!S.draft) return;
+  document.querySelectorAll("#ex-list .editor input[data-i]").forEach((inp) => {
+    const i = +inp.dataset.i, f = inp.dataset.f, v = inp.value.trim().replace(",", ".");
+    if (!S.draft.sets[i]) return;
+    S.draft.sets[i][f] = v === "" ? null : (isFinite(+v) ? (f === "reps" ? Math.round(+v) : +v) : S.draft.sets[i][f]);
+  });
+}
+async function saveDraft(name) {
+  readDraftInputs();
+  const sets = S.draft.sets.filter((s) => s.kg != null || s.reps != null).map((s) => ({ kg: s.kg, reps: s.reps }));
+  const cs = currentSession(); if (!cs) return;
+  if (!sets.length) { toast("Trag mindestens ein Gewicht oder Wiederholungen ein."); return; }
+  const day = dayById(cs.dayId);
+  const prevBody = cs.data ? JSON.parse(JSON.stringify(cs.data)) : null;
+  const now = new Date().toISOString();
+  const body = prevBody ? JSON.parse(JSON.stringify(prevBody)) : { date: S.date, dayId: cs.dayId, dayName: day ? day.name : "", entries: [], createdAt: now };
+  const n = norm(name);
+  const i = body.entries.findIndex((x) => norm(x.exercise) === n);
+  const pe = planExercise(name);
+  if (i >= 0) { body.entries[i].sets = sets; body.entries[i].at = now; }
+  else body.entries.push({ id: uid(), exercise: name, scheme: pe ? schemeOf(pe) : "", sets, note: "", said: "", at: now });
+  body.updatedAt = now;
+  S.open = null; S.draft = null;
+  try { await putSession(cs.id, body); toast(`${name} gespeichert.`, async () => { try { await putSession(cs.id, prevBody); toast("Rückgängig gemacht."); } catch (_) {} }); } catch (_) {}
+}
+async function deleteEntry(name) {
+  const cs = currentSession(); if (!cs || !cs.data) return;
+  const prevBody = JSON.parse(JSON.stringify(cs.data));
+  const body = JSON.parse(JSON.stringify(cs.data));
+  body.entries = body.entries.filter((x) => norm(x.exercise) !== norm(name));
+  body.updatedAt = new Date().toISOString();
+  S.open = null; S.draft = null;
+  try { await putSession(cs.id, body.entries.length ? body : null); toast(`${name} gelöscht.`, async () => { try { await putSession(cs.id, prevBody); toast("Wiederhergestellt."); } catch (_) {} }); } catch (_) {}
+}
+
+/* ---------- Toast ---------- */
+let toastTimer = null, toastUndo = null;
+function toast(msg, undo) {
+  $("toast-text").textContent = msg;
+  toastUndo = undo || null;
+  $("toast-undo").hidden = !undo;
+  $("toast").hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $("toast").hidden = true; toastUndo = null; }, undo ? 7000 : 4500);
+}
+$("toast-undo").addEventListener("click", () => { const f = toastUndo; $("toast").hidden = true; toastUndo = null; if (f) f(); });
+
+/* ---------- Ereignisse ---------- */
+function route() {
+  const h = (location.hash || "").slice(1);
+  S.view = ["heute", "verlauf", "plan"].includes(h) ? h : "heute";
+  render();
+}
+window.addEventListener("hashchange", route);
+
+$("days").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-day]"); if (!b) return;
+  S.dayId = b.dataset.day; S.sel = null; S.open = null; S.draft = null; render();
+});
+$("ex-list").addEventListener("click", (e) => {
+  const act = e.target.closest("[data-act]");
+  if (act) {
+    const a = act.dataset.act;
+    if (a === "add-set") { readDraftInputs(); const last = S.draft.sets[S.draft.sets.length - 1]; S.draft.sets.push({ kg: last ? last.kg : null, reps: last ? last.reps : null, ph: null }); render(); const k = $(`ed-kg-${S.draft.sets.length - 1}`); if (k) k.focus(); }
+    else if (a === "rm-set") { readDraftInputs(); S.draft.sets.splice(+act.dataset.i, 1); render(); }
+    else if (a === "save") saveDraft(act.dataset.ex);
+    else if (a === "del") deleteEntry(act.dataset.ex);
+    return;
+  }
+  const b = e.target.closest("[data-ex]"); if (!b) return;
+  const n = norm(b.dataset.ex);
+  if (S.open === n) { S.open = null; S.sel = null; S.draft = null; }
+  else { S.open = n; S.sel = b.dataset.ex; S.draft = null; }
+  render();
+});
+$("ex-list").addEventListener("input", (e) => { if (e.target.matches(".editor input[data-i]")) readDraftInputs(); });
+$("date").addEventListener("change", (e) => { if (!e.target.value) return; S.date = e.target.value; S.dayId = null; S.sel = null; S.open = null; S.draft = null; render(); });
+$("back-today").addEventListener("click", () => { S.date = todayISO(); S.dayId = null; S.sel = null; S.open = null; S.draft = null; render(); });
+$("weeks").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-open]"); if (!b) return;
+  const s = S.sessions.get(b.dataset.open); if (!s) return;
+  S.date = s.date; S.dayId = s.dayId; S.sel = null; S.open = null; S.draft = null;
+  location.hash = "#heute";
+  route();
+  window.scrollTo(0, 0);
+});
+$("mic").addEventListener("click", micClick);
+$("typed-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const inp = $("typed"); const v = inp.value.trim(); if (!v || S.rec.busy) return;
+  inp.value = "";
+  S.rec.final = v;
+  await handleText(v);
+});
+$("plan-form").addEventListener("submit", savePlan);
+$("plan-text").addEventListener("input", (e) => { e.target.dataset.dirty = "1"; });
+
+/* ---------- Start ---------- */
+route();
+
+async function connect() {
+  const c = window.claude;
+  if (!c || typeof c.use !== "function") { S.memoryOnly = true; S.ready.plan = true; S.ready.sessions = true; render(); return; }
+
+  c.use("dictation").then((d) => {
+    if (!d) { setHint("Spracheingabe gibt es hier nicht. Tipp deine Sätze ein, am Handy geht das auch mit der Diktiertaste der Tastatur."); return; }
+    S.dict = d; $("mic").hidden = false;
+    d.onPartial(({ text }) => { S.rec.partial = text; renderLive(); });
+    d.onFinal(({ text }) => { S.rec.final = (S.rec.final ? S.rec.final + text : text.replace(/^\s+/, "")); S.rec.partial = ""; renderLive(); });
+    d.onState(({ state, reason }) => {
+      if (state === "idle") {
+        const was = S.rec.on; S.rec.on = false; S.rec.partial = "";
+        if (reason === "not_granted") { hideMic("Das Mikrofon ist für diese Seite aus. Tipp deine Sätze ein oder nutz die Diktiertaste deiner Tastatur."); return; }
+        if (reason === "unavailable" && S.rec.noLang) { hideMic("Spracheingabe ist hier nicht verfügbar. Tipp deine Sätze ein."); return; }
+        if (reason === "time_limit") toast("Die Aufnahme lief eine Stunde und wurde beendet.");
+        const text = S.rec.final.trim();
+        renderLive();
+        if (was && text) handleText(text);
+      } else { S.rec.on = true; renderLive(); }
+    });
+  }).catch(() => {});
+
+  c.use("sample").then((s) => { S.sample = s || null; }).catch(() => {});
+
+  c.use("user").then(async (u) => {
+    if (!u) return;
+    try { const own = await u.isOwner(); if (own === false) { S.noWrite = true; render(); } } catch (_) {}
+  }).catch(() => {});
+
+  const db = await c.use("db").catch(() => null);
+  if (!db) { S.memoryOnly = true; S.ready.plan = true; S.ready.sessions = true; render(); return; }
+  S.db = db;
+
+  const staleTimer = setTimeout(() => { if (!S.ready.plan || !S.ready.sessions) { S.stale = true; renderBanner(); } }, 10000);
+  const settle = () => { if (S.ready.plan && S.ready.sessions) { clearTimeout(staleTimer); if (S.stale) { S.stale = false; renderBanner(); } } };
+
+  db.doc("plan/current").onSnapshot((snap) => {
+    S.plan = snap.exists ? snap.data() : null;
+    if (!snap.metadata.fromCache) S.ready.plan = true;
+    else if (snap.exists) S.ready.plan = true;
+    settle(); render();
+  }, () => { S.ready.plan = true; settle(); render(); });
+
+  db.collection("sessions").orderBy("date", "desc").limit(1000).onSnapshot((snap) => {
+    const m = new Map();
+    for (const d of snap.docs) m.set(d.id, d.data());
+    S.sessions = m;
+    if (!snap.metadata.fromCache || snap.size) S.ready.sessions = true;
+    settle(); render();
+  }, () => { S.ready.sessions = true; settle(); render(); });
+}
+connect();
+})();
+</script>
