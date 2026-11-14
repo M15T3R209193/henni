@@ -1,0 +1,1654 @@
+<title>Wohnwerk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Handy zuerst. Eine Spalte, unten die Leiste Räume · Ideen · Einkauf. Die Fotoansicht ist eine eigene Seite,
+   Fragen, Rechner und Auswahl kommen als Blatt von unten. Ab Tablet bleibt alles mittig in 760px. Akzent: Tannengrün wie
+   eine Wandfarbe, dazu Maßband-Gelb für Markierungen und Fortschritt. */
+:root {
+  --bg: #edf0ed;
+  --surface: #ffffff;
+  --surface-2: #f3f6f4;
+  --ink: #17211e;
+  --ink-2: #4a5853;
+  --muted: #74827d;
+  --line: #d9e1dd;
+  --tanne: #1c5c4f;
+  --tanne-hover: #154a3f;
+  --on-tanne: #ffffff;
+  --tanne-tint: #dcebe6;
+  --tanne-text: #1c5c4f;
+  --band: #f4c430;
+  --band-edge: #a77c00;
+  --band-ink: #211a00;
+  --tick: rgba(33, 26, 0, .6);
+  --tick-soft: rgba(23, 33, 30, .32);
+  --pin-ring: rgba(0, 0, 0, .55);
+  --good: #1d7650; --good-tint: #dcf0e5;
+  --warn: #8f5500; --warn-tint: #f9ecd3;
+  --bad: #ad3631; --bad-tint: #f7dfdc;
+  --scrim: rgba(12, 18, 16, .45);
+  --toast-bg: #17211e; --toast-fg: #f2f6f4; --toast-act: #f4c430;
+  --shadow-sm: 0 1px 2px rgba(20, 40, 34, .06), 0 4px 14px rgba(20, 40, 34, .06);
+  --shadow: 0 12px 38px rgba(20, 40, 34, .18);
+  --f-display: "Bricolage Grotesque", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
+  --f-body: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tabs-h: 64px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1412; --surface: #171e1b; --surface-2: #1e2723; --ink: #e7eeea; --ink-2: #b0bdb7; --muted: #85938d; --line: #2c3632;
+    --tanne: #5dc2a6; --tanne-hover: #79d1b8; --on-tanne: #06201a; --tanne-tint: #19362f; --tanne-text: #82d8bf;
+    --band: #f4c430; --band-edge: #f4c430; --band-ink: #211a00; --tick: rgba(33, 26, 0, .6); --tick-soft: rgba(231, 238, 234, .28);
+    --pin-ring: rgba(0, 0, 0, .55);
+    --good: #66d6a0; --good-tint: #163529; --warn: #f1b75f; --warn-tint: #3a2c13; --bad: #f2908a; --bad-tint: #3c1e1c;
+    --scrim: rgba(0, 0, 0, .62); --toast-bg: #e7eeea; --toast-fg: #0f1412; --toast-act: #1c5c4f;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .45); --shadow: 0 14px 44px rgba(0, 0, 0, .55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1412; --surface: #171e1b; --surface-2: #1e2723; --ink: #e7eeea; --ink-2: #b0bdb7; --muted: #85938d; --line: #2c3632;
+  --tanne: #5dc2a6; --tanne-hover: #79d1b8; --on-tanne: #06201a; --tanne-tint: #19362f; --tanne-text: #82d8bf;
+  --band: #f4c430; --band-edge: #f4c430; --band-ink: #211a00; --tick: rgba(33, 26, 0, .6); --tick-soft: rgba(231, 238, 234, .28);
+  --pin-ring: rgba(0, 0, 0, .55);
+  --good: #66d6a0; --good-tint: #163529; --warn: #f1b75f; --warn-tint: #3a2c13; --bad: #f2908a; --bad-tint: #3c1e1c;
+  --scrim: rgba(0, 0, 0, .62); --toast-bg: #e7eeea; --toast-fg: #0f1412; --toast-act: #1c5c4f;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .45); --shadow: 0 14px 44px rgba(0, 0, 0, .55);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+}
+body.locked { overflow: hidden; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--band); outline-offset: 2px; }
+.vh { position: absolute !important; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.wrap {
+  width: 100%; max-width: 760px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Kopf */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); }
+.top-in { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 62px; padding-block: 10px; }
+.top-in.nav { grid-template-columns: auto minmax(0, 1fr) auto; }
+.brand { display: inline-grid; gap: 3px; justify-self: start; }
+.brand-name { font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; letter-spacing: -.02em; line-height: 1; }
+.tape-mini {
+  display: block; height: 8px; border-radius: 1px;
+  background:
+    repeating-linear-gradient(90deg, var(--tick) 0 1px, transparent 1px 30px) left bottom / 100% 6px no-repeat,
+    repeating-linear-gradient(90deg, var(--tick) 0 1px, transparent 1px 6px) left bottom / 100% 3px no-repeat,
+    var(--band);
+}
+.sync { display: inline-flex; align-items: center; gap: 7px; font-size: .76rem; font-weight: 600; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 5px 11px; white-space: nowrap; }
+.sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.sync[data-mode="cloud"] i { background: var(--good); }
+.sync[data-mode="local"] i, .sync[data-mode="waiting"] i { background: var(--warn); }
+.back { border: 0; background: none; display: inline-flex; align-items: center; gap: 2px; color: var(--tanne-text); font-weight: 600; padding: 8px 6px 8px 0; }
+.h-title { font-family: var(--f-display); font-weight: 700; font-size: 1.12rem; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.h-btn { border: 0; background: none; color: var(--tanne-text); font-weight: 600; padding: 8px 0 8px 6px; }
+
+main.wrap { padding-block: 6px calc(var(--tabs-h) + env(safe-area-inset-bottom, 0px) + 32px); }
+
+/* Typo */
+.h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(1.65rem, 5.4vw, 2.15rem); line-height: 1.08; letter-spacing: -.02em; margin: 0 0 6px; text-wrap: balance; }
+.h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.16rem; line-height: 1.2; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; text-wrap: balance; }
+.lead { color: var(--ink-2); margin: 0; max-width: 60ch; }
+.eyebrow { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; }
+.count { font-family: var(--f-body); font-size: .74rem; font-weight: 700; background: var(--tanne-tint); color: var(--tanne-text); padding: 2px 8px; border-radius: 99px; }
+.muted { color: var(--muted); }
+
+/* Knöpfe */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px;
+  border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600;
+  transition: background-color .15s, transform .1s; text-align: center; line-height: 1.2;
+}
+.btn:active:not(:disabled) { transform: scale(.98); }
+.btn.primary { background: var(--tanne); border-color: var(--tanne); color: var(--on-tanne); }
+.btn.primary:hover:not(:disabled) { background: var(--tanne-hover); border-color: var(--tanne-hover); }
+.btn.small { min-height: 38px; padding: 0 13px; font-size: .88rem; border-radius: 10px; }
+.btn.ghost { background: transparent; }
+.btn.wide { width: 100%; }
+.btn.danger { color: var(--bad); }
+.btn:disabled { opacity: .5; }
+.file { position: relative; cursor: pointer; }
+.link { border: 0; background: none; color: var(--tanne-text); font-weight: 600; padding: 8px 0; }
+.link.danger { color: var(--bad); }
+.link:disabled { opacity: .45; }
+
+/* Felder */
+input[type="text"], input:not([type]), textarea, select {
+  width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; font-size: 16px; line-height: 1.4;
+}
+textarea { resize: vertical; min-height: 48px; display: block; }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--tanne); width: 20px; height: 20px; margin: 0; flex: none; }
+.lbl { display: block; font-size: .84rem; font-weight: 600; color: var(--ink-2); margin: 0 0 6px; }
+.note { background: var(--surface-2); color: var(--ink-2); padding: 11px 14px; border-radius: 12px; font-size: .9rem; margin: 10px 0; }
+.err { background: var(--bad-tint); color: var(--bad); padding: 11px 14px; border-radius: 12px; font-size: .92rem; margin: 12px 0 0; }
+
+/* Räume */
+.add-card { display: grid; gap: 16px; padding: 18px; background: var(--surface); border-radius: 18px; box-shadow: var(--shadow-sm); margin: 6px 0 26px; }
+.add-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.room { margin-bottom: 26px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.tile { padding: 0; border: 0; background: var(--surface); border-radius: 14px; overflow: hidden; text-align: left; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; min-width: 0; }
+.tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--surface-2); }
+.tile-meta { display: flex; justify-content: space-between; gap: 6px; padding: 8px 10px; font-size: .8rem; color: var(--ink-2); }
+.tile-meta b { font-weight: 600; color: var(--ink); }
+.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 14px; padding: 14px 16px; background: var(--surface); border-radius: 14px; }
+.steps li::before { content: counter(s); grid-row: span 2; width: 40px; height: 40px; border-radius: 50%; background: var(--band); color: var(--band-ink); font-family: var(--f-display); font-weight: 800; font-size: 1.1rem; display: grid; place-items: center; }
+.steps b { display: block; font-weight: 700; }
+.steps span { color: var(--ink-2); font-size: .93rem; }
+
+/* Foto */
+.stage { position: relative; width: fit-content; max-width: 100%; margin: 6px auto 0; cursor: crosshair; touch-action: manipulation; }
+.stage img { display: block; max-width: 100%; max-height: 66vh; width: auto; height: auto; border-radius: 14px; background: var(--surface-2); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; box-shadow: var(--shadow-sm); }
+.pin {
+  position: absolute; transform: translate(-50%, -50%); width: 34px; height: 34px; padding: 0; border-radius: 50%;
+  border: 0; background: var(--band); color: var(--band-ink); font-weight: 800; font-size: .9rem; display: grid; place-items: center;
+  box-shadow: 0 0 0 3px var(--pin-ring), 0 4px 14px var(--pin-ring);
+}
+.pin.draft { animation: pulse 1.5s ease-out infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 3px var(--pin-ring), 0 0 0 0 rgba(244, 196, 48, .75); } 80%, 100% { box-shadow: 0 0 0 3px var(--pin-ring), 0 0 0 18px rgba(244, 196, 48, 0); } }
+.stage-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 12px 0 24px; }
+.hint { margin: 0; display: flex; gap: 8px; align-items: center; color: var(--ink-2); font-size: .93rem; }
+.spot-list { display: grid; gap: 8px; }
+.spot-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; text-align: left; padding: 12px 14px; background: var(--surface); border: 0; border-radius: 14px; box-shadow: var(--shadow-sm); width: 100%; }
+.pin-num { width: 30px; height: 30px; border-radius: 50%; background: var(--band); color: var(--band-ink); font-weight: 800; display: grid; place-items: center; font-size: .85rem; }
+.pin-num.room { background: var(--tanne-tint); color: var(--tanne-text); }
+.spot-txt { min-width: 0; }
+.spot-txt b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.spot-txt small { color: var(--muted); font-size: .84rem; }
+.chev { color: var(--muted); }
+
+/* Blatt */
+.sheet-wrap { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.scrim { position: absolute; inset: 0; background: var(--scrim); border: 0; padding: 0; }
+.sheet {
+  position: relative; width: 100%; max-width: 680px; max-height: calc(100% - env(safe-area-inset-top, 0px) - 20px);
+  overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 22px 22px 0 0; box-shadow: var(--shadow);
+  padding-top: 8px; padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.sheet:focus { outline: none; }
+.sheet::before { content: ""; display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 2px auto 12px; }
+.sheet.anim { animation: up .26s cubic-bezier(.2, .8, .2, 1); }
+@keyframes up { from { transform: translateY(48px); opacity: .3; } }
+@media (min-width: 720px) {
+  .sheet-wrap { align-items: center; padding: 24px; }
+  .sheet { border-radius: 22px; max-height: 88vh; padding-bottom: 22px; }
+}
+.sh-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; margin-bottom: 16px; }
+.sh-head.plain { grid-template-columns: minmax(0, 1fr) auto; }
+.sh-title { font-family: var(--f-display); font-weight: 800; font-size: 1.32rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+.sh-sub { margin: 2px 0 0; color: var(--ink-2); font-size: .9rem; }
+.x { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--surface); color: var(--ink-2); display: grid; place-items: center; }
+.zoom { width: 72px; height: 72px; border-radius: 12px; background-color: var(--surface-2); background-repeat: no-repeat; position: relative; overflow: hidden; flex: none; }
+.zoom.sm { width: 52px; height: 52px; border-radius: 10px; }
+.zoom-ring { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--band); box-shadow: 0 0 0 2px var(--pin-ring); transform: translate(-50%, -50%); }
+.zoom.sm .zoom-ring { width: 16px; height: 16px; border-width: 2px; }
+.preview { display: block; width: 100%; max-height: 42vh; object-fit: contain; border-radius: 14px; background: var(--surface-2); margin-bottom: 16px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.chip { border: 1px solid var(--line); background: var(--surface); padding: 8px 13px; border-radius: 99px; font-size: .9rem; font-weight: 500; line-height: 1.25; }
+.chip[aria-pressed="true"] { background: var(--tanne); color: var(--on-tanne); border-color: var(--tanne); }
+label.chip { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+label.chip:has(input:checked) { background: var(--tanne-tint); border-color: var(--tanne); color: var(--tanne-text); }
+.ask textarea { margin-bottom: 12px; }
+
+/* Antwort */
+.q-bubble { background: var(--tanne); color: var(--on-tanne); padding: 10px 14px; border-radius: 16px 16px 4px 16px; margin: 0 0 14px auto; width: fit-content; max-width: 88%; overflow-wrap: anywhere; }
+.blick { margin: 0 0 14px; }
+.blick p { margin: 0; color: var(--ink-2); }
+.loading { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-top: 12px; background: var(--surface); border-radius: 14px; color: var(--ink-2); font-size: .93rem; }
+.loading span:nth-child(2) { flex: 1; min-width: 0; }
+.tape-load {
+  flex: none; display: inline-block; width: 56px; height: 12px; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--tick) 0 1px, transparent 1px 7px) 0 100% / 56px 5px repeat-x, var(--band);
+  animation: tape 1s linear infinite;
+}
+@keyframes tape { from { background-position: 0 100%; } to { background-position: 7px 100%; } }
+.ideas { display: grid; gap: 12px; }
+.idea { background: var(--surface); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); min-width: 0; }
+.idea-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.idea h3 { font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; line-height: 1.25; margin: 0; text-wrap: balance; }
+.star { border: 0; background: transparent; width: 42px; height: 42px; margin: -9px -11px -6px 0; display: grid; place-items: center; color: var(--muted); flex: none; border-radius: 50%; }
+.star .ic { width: 22px; height: 22px; }
+.star.on { color: var(--band-edge); }
+.star.on .ic { fill: var(--band); }
+.idea-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+.pill { font-size: .75rem; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+.a-leicht { background: var(--good-tint); color: var(--good); }
+.a-mittel { background: var(--warn-tint); color: var(--warn); }
+.a-aufwendig { background: var(--bad-tint); color: var(--bad); }
+.cost { font-size: .78rem; font-weight: 600; color: var(--ink-2); padding: 3px 9px; border-radius: 99px; background: var(--surface-2); font-variant-numeric: tabular-nums; }
+.idea p { margin: 0 0 10px; }
+.mat ul { margin: 0 0 12px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.mat li { font-size: .85rem; padding: 4px 10px; border-radius: 8px; background: var(--surface-2); border: 1px dashed var(--line); overflow-wrap: anywhere; }
+.mat .eyebrow { margin-bottom: 6px; }
+.idea-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.tool-inline { margin-top: 12px; }
+
+.chat-label { margin-top: 22px; }
+.chat { display: grid; gap: 10px; }
+.msg { padding: 10px 14px; border-radius: 16px; max-width: 92%; overflow-wrap: anywhere; }
+.msg.user { background: var(--tanne); color: var(--on-tanne); margin-left: auto; border-bottom-right-radius: 4px; }
+.msg.assistant { background: var(--surface); border-bottom-left-radius: 4px; }
+.msg p { margin: 0 0 8px; }
+.msg > :last-child { margin-bottom: 0; }
+.msg ul, .msg ol { margin: 0 0 8px; padding-left: 20px; }
+.msg li { margin-bottom: 3px; }
+.thinking { display: inline-flex; align-items: center; gap: 10px; color: var(--ink-2); }
+.follow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-top: 16px; }
+.follow textarea { resize: none; max-height: 160px; }
+.send { width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--tanne); color: var(--on-tanne); display: grid; place-items: center; }
+.send:disabled { opacity: .45; }
+.sh-foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+/* Ideen */
+.saved-list { display: grid; gap: 18px; margin-top: 16px; }
+.saved-head { display: flex; gap: 10px; align-items: center; margin: 0 0 8px; border: 0; background: none; padding: 0; text-align: left; width: 100%; color: var(--ink-2); font-size: .88rem; min-width: 0; }
+.saved-head span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-head b { color: var(--ink); font-weight: 600; }
+.empty { background: var(--surface); border-radius: 16px; padding: 18px; color: var(--ink-2); margin-top: 14px; }
+.empty b { display: block; color: var(--ink); font-family: var(--f-display); font-size: 1.08rem; margin-bottom: 4px; }
+
+/* Einkauf */
+.seg { display: inline-grid; grid-auto-flow: column; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 4px; gap: 4px; margin: 12px 0 18px; }
+.seg button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; font-weight: 600; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+.new-proj { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-bottom: 14px; }
+.projs { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.proj { text-align: left; border: 0; background: var(--surface); border-radius: 16px; padding: 14px 16px; box-shadow: var(--shadow-sm); display: grid; gap: 10px; width: 100%; min-width: 0; }
+.proj-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; min-width: 0; }
+.proj-top b { font-family: var(--f-display); font-size: 1.08rem; font-weight: 700; min-width: 0; overflow-wrap: anywhere; line-height: 1.25; }
+.tag { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--tanne-tint); color: var(--tanne-text); white-space: nowrap; }
+.tape { position: relative; display: block; height: 14px; border-radius: 3px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.tape i { position: absolute; inset: 0 auto 0 0; background: var(--band); }
+.tape::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(90deg, var(--tick-soft) 0 1px, transparent 1px 10%) left bottom / 100% 7px no-repeat,
+    repeating-linear-gradient(90deg, var(--tick-soft) 0 1px, transparent 1px 2%) left bottom / 100% 3px no-repeat;
+}
+.proj-meta { font-size: .86rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.tool { display: flex; gap: 14px; align-items: center; margin-top: 22px; padding: 14px 16px; border-radius: 16px; background: var(--tanne-tint); color: var(--tanne-text); border: 0; width: 100%; text-align: left; }
+.tool b { display: block; color: var(--ink); font-weight: 700; }
+.tool span span { color: var(--ink-2); font-size: .9rem; }
+.tool .ic { width: 26px; height: 26px; }
+.group { margin-bottom: 18px; }
+.group .h2 { font-size: 1.02rem; }
+
+.card { background: var(--surface); border-radius: 18px; padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 14px; }
+.card input:not([type]), .card textarea, .card input[type="text"] { background: var(--surface-2); }
+.title-input { font-family: var(--f-display); font-size: 1.55rem; font-weight: 800; letter-spacing: -.01em; border: 0 !important; background: transparent !important; padding: 2px 0 !important; border-radius: 0 !important; }
+.add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-bottom: 8px; }
+.items { list-style: none; margin: 0; padding: 0; }
+.item { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.check { width: 30px; height: 30px; border-radius: 8px; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; color: transparent; padding: 0; }
+.check .ic { width: 18px; height: 18px; stroke-width: 3; }
+.item.done .check { background: var(--tanne); border-color: var(--tanne); color: var(--on-tanne); }
+.item.done .item-t { text-decoration: line-through; color: var(--muted); }
+.item-t { min-width: 0; overflow-wrap: anywhere; padding: 6px 0; }
+.del { border: 0; background: none; color: var(--muted); width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; }
+.del .ic { width: 18px; height: 18px; }
+details.done-list { margin-top: 10px; }
+details.done-list summary { cursor: pointer; color: var(--ink-2); font-weight: 600; padding: 6px 0; }
+.saved-hint { margin: 6px 0 0; font-size: .8rem; color: var(--muted); }
+.row-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; margin-top: 4px; }
+
+/* Rechner */
+.rects { display: grid; gap: 8px; margin-bottom: 4px; }
+.rect { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto 40px; gap: 8px; align-items: center; }
+.rect > span { color: var(--muted); font-weight: 600; }
+.radios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 14px; }
+.radio { cursor: pointer; }
+.radio span { display: grid; gap: 1px; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); text-align: center; height: 100%; }
+.radio small { color: var(--muted); font-size: .76rem; }
+.radio input:checked + span { border-color: var(--tanne); background: var(--tanne-tint); color: var(--tanne-text); }
+.radio input:focus-visible + span { outline: 3px solid var(--band); outline-offset: 2px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 12px; }
+.toggle { display: flex; gap: 10px; align-items: center; margin: 2px 0 14px; font-weight: 500; cursor: pointer; }
+.section-gap { margin-top: 16px; }
+.result { background: var(--surface); border-radius: 16px; padding: 14px 16px; margin: 6px 0 18px; box-shadow: var(--shadow-sm); }
+.res-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.big { font-family: var(--f-display); font-size: 2.3rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.result dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; margin: 0; }
+.result dt { color: var(--ink-2); }
+.result dd { margin: 0; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.result p { margin: 0; }
+.checks { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 2px; }
+.check-row { display: flex; gap: 12px; align-items: center; padding: 9px 2px; cursor: pointer; }
+.check-row small { color: var(--muted); }
+.radio-list { display: grid; gap: 2px; margin-bottom: 16px; }
+
+/* Leiste unten */
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--surface); border-top: 1px solid var(--line);
+  padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.tabs-in { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.tab { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; font-size: .74rem; font-weight: 600; color: var(--muted); position: relative; }
+.tab .ic-wrap { display: grid; place-items: center; padding: 4px 18px; border-radius: 99px; }
+.tab[aria-current="page"] { color: var(--tanne-text); }
+.tab[aria-current="page"] .ic-wrap { background: var(--tanne-tint); }
+.badge { position: absolute; top: 0; left: calc(50% + 12px); background: var(--band); color: var(--band-ink); font-size: .66rem; font-weight: 800; min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px; display: grid; place-items: center; }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tabs-h) + env(safe-area-inset-bottom, 0px) + 14px); z-index: 60;
+  background: var(--toast-bg); color: var(--toast-fg); padding: 12px 16px; border-radius: 14px; display: flex; gap: 14px; align-items: center;
+  width: max-content; max-width: calc(100% - 32px); box-shadow: var(--shadow); font-size: .92rem;
+}
+.toast button { border: 0; background: none; color: var(--toast-act); font-weight: 700; padding: 4px 0; white-space: nowrap; }
+
+@media (max-width: 380px) {
+  .add-btns { grid-template-columns: 1fr; }
+  .radios { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<header class="top"><div class="wrap top-in" id="top"></div></header>
+<main class="wrap" id="main">
+  <section id="v-raeume" aria-label="Räume"></section>
+  <section id="v-ideen" aria-label="Gemerkte Ideen" hidden></section>
+  <section id="v-einkauf" aria-label="Einkauf und Projekte" hidden></section>
+  <section id="v-foto" aria-label="Foto" hidden></section>
+  <section id="v-projekt" aria-label="Projekt" hidden></section>
+</main>
+<nav class="tabs" aria-label="Bereiche"><div class="tabs-in" id="tabs"></div></nav>
+<div class="sheet-wrap" id="sheet" hidden>
+  <button class="scrim" data-act="closeSheet" aria-label="Schließen" tabindex="-1"></button>
+  <div class="sheet" id="sheetBody" role="dialog" aria-modal="true" tabindex="-1"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Helfer ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const now = () => Date.now();
+const clone = o => JSON.parse(JSON.stringify(o));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmtN = (n, d = 2) => Number(n).toLocaleString('de-DE', { maximumFractionDigits: d });
+const fmtEuro = n => Number(n).toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+const fmtDate = ts => new Date(ts).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', '.').replace(/[^\d.]/g, '')); return isFinite(n) && n > 0 ? n : 0; };
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+
+const P = {
+  cam: '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  img: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+  home: '<path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+  star: '<path d="M12 2.5l2.94 5.96 6.56.95-4.75 4.63 1.12 6.54L12 17.5l-5.87 3.08 1.12-6.54L2.5 9.41l6.56-.95z"/>',
+  cart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>',
+  ruler: '<path d="M21.3 8.7l-6-6a1 1 0 0 0-1.4 0L2.7 13.9a1 1 0 0 0 0 1.4l6 6a1 1 0 0 0 1.4 0L21.3 10.1a1 1 0 0 0 0-1.4z"/><path d="M7.5 10.5l2 2M10.5 7.5l2 2M13.5 4.5l2 2M4.5 13.5l2 2"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',
+  up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
+  back: '<path d="M15 18l-6-6 6-6"/>',
+  next: '<path d="M9 18l6-6-6-6"/>',
+  copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>'
+};
+const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+
+const RAEUME = ['Flur', 'Wohnzimmer', 'Küche', 'Schlafzimmer', 'Bad', 'Arbeitszimmer', 'Kinderzimmer', 'Balkon'];
+const ROOM_EN = { Flur: 'hallway', Wohnzimmer: 'living room', 'Küche': 'kitchen', Schlafzimmer: 'bedroom', Bad: 'bathroom', Arbeitszimmer: 'home office', Kinderzimmer: "children's room", Balkon: 'balcony' };
+const FRAGEN = [
+  ['Was könnte ich hier machen?', 'Was könnte ich hier machen?'],
+  ['Deko-Ideen', 'Gib mir Deko-Ideen für diese Stelle.'],
+  ['Boden neu verlegen', 'Ich möchte hier den Boden neu verlegen. Welcher Belag passt, und wie gehe ich vor?'],
+  ['Wand & Farbe', 'Welche Wandfarbe oder Wandgestaltung würde hier gut aussehen?'],
+  ['Licht', 'Wie kann ich das Licht hier verbessern?'],
+  ['Mehr Stauraum', 'Wie bekomme ich hier mehr Stauraum hin?'],
+  ['Günstig aufwerten', 'Wie kann ich das hier für unter 50 € aufwerten?']
+];
+const VORLAGEN = [['Flur – neuer Boden', 'Flur'], ['Wohnzimmer – Deko', 'Wohnzimmer'], ['Bad – aufwerten', 'Bad'], ['Balkon – gemütlich', 'Balkon']];
+const EXTRAS = [['keile', 'Abstandskeile'], ['profil', 'Übergangsprofil für die Tür'], ['set', 'Verlegeset (Zugeisen, Schlagklotz)'], ['folie', 'PE-Folie als Dampfbremse (bei Estrich)']];
+const ARTEN = [['gerade', 'Gerade', .05], ['versetzt', 'Versetzt', .10], ['diagonal', 'Diagonal', .15]];
+const LS_KEY = 'wohnwerk.v1';
+
+/* ---------- Zustand ---------- */
+function normPhoto(p) {
+  p.kind = 'foto';
+  p.raum = String(p.raum || 'Sonstiges');
+  p.spots = Array.isArray(p.spots) ? p.spots : [];
+  p.spots.forEach(s => { s.ideas = Array.isArray(s.ideas) ? s.ideas : []; s.chat = Array.isArray(s.chat) ? s.chat : []; s.frage = s.frage || ''; s.blick = s.blick || ''; });
+  p.createdAt = p.createdAt || now();
+  p.updatedAt = p.updatedAt || 0;
+  return p;
+}
+function normListen(l) {
+  l = l && typeof l === 'object' ? l : {};
+  const projects = Array.isArray(l.projects) ? l.projects : [];
+  projects.forEach(pr => { pr.items = Array.isArray(pr.items) ? pr.items : []; pr.notiz = pr.notiz || ''; pr.name = pr.name || 'Projekt'; pr.raum = pr.raum || ''; pr.id = pr.id || newId(); });
+  return { kind: 'listen', projects, updatedAt: l.updatedAt || 0 };
+}
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      const photos = {};
+      Object.values(d.photos || {}).forEach(p => { if (p && p.id) photos[p.id] = normPhoto(p); });
+      return { photos, listen: normListen(d.listen) };
+    }
+  } catch (e) { /* kein Speicher */ }
+  return { photos: {}, listen: normListen(null) };
+}
+function saveLocal() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); }
+  catch (e) {
+    try {
+      const lite = { listen: S.listen, photos: {} };
+      Object.entries(S.photos).forEach(([k, p]) => { lite.photos[k] = Object.assign({}, p, { thumb: '' }); });
+      localStorage.setItem(LS_KEY, JSON.stringify(lite));
+    } catch (e2) { /* voll oder gesperrt */ }
+  }
+}
+let S = loadLocal();
+
+const UI = { view: 'raeume', photoId: null, projectId: null, shop: 'projekte', stack: [], ai: null, drafts: {}, draft: null, pending: null, saving: false, roomChoice: '', boden: null };
+const AI = { fn: null, state: 'pending', images: null };
+const Caps = { assets: null, assetsP: Promise.resolve(null) };
+
+/* ---------- Bilder im Gerät (IndexedDB) ---------- */
+const idb = (() => {
+  let p = null;
+  const open = () => p || (p = new Promise((res, rej) => {
+    try {
+      const r = indexedDB.open('wohnwerk', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('bilder');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    } catch (e) { rej(e); }
+  }));
+  const tx = async (mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction('bilder', mode);
+      const req = fn(t.objectStore('bilder'));
+      t.oncomplete = () => res(req && req.result);
+      t.onerror = () => rej(t.error);
+    });
+  };
+  return {
+    get: k => tx('readonly', s => s.get(k)).catch(() => null),
+    set: (k, v) => tx('readwrite', s => s.put(v, k)).then(() => true).catch(() => false),
+    del: k => tx('readwrite', s => s.delete(k)).catch(() => null)
+  };
+})();
+const blobs = new Map();
+const objUrls = new Map();
+function objUrl(id, blob) {
+  if (!objUrls.has(id)) objUrls.set(id, URL.createObjectURL(blob));
+  return objUrls.get(id);
+}
+function fullUrl(p) {
+  if (blobs.has(p.id)) return objUrl(p.id, blobs.get(p.id));
+  if (p.asset) return '/_blob/' + p.asset;
+  if (p.local) {
+    idb.get(p.id).then(b => {
+      if (!b) return;
+      blobs.set(p.id, b);
+      const u = objUrl(p.id, b);
+      $$('img[data-full="' + p.id + '"]').forEach(i => { i.src = u; });
+      $$('[data-zoom="' + p.id + '"]').forEach(z => { z.style.backgroundImage = 'url("' + u + '")'; });
+    });
+  }
+  return p.thumb || '';
+}
+async function fullSrc(p) {
+  if (blobs.has(p.id)) return objUrl(p.id, blobs.get(p.id));
+  if (p.asset) return '/_blob/' + p.asset;
+  if (p.local) { const b = await idb.get(p.id); if (b) { blobs.set(p.id, b); return objUrl(p.id, b); } }
+  return p.thumb;
+}
+function loadImg(src) {
+  return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Bild')); i.src = src; });
+}
+function toBlob(c, q) {
+  return new Promise((res, rej) => { try { c.toBlob(b => b ? res(b) : rej(new Error('blob')), 'image/jpeg', q); } catch (e) { rej(e); } });
+}
+function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+async function processFile(file) {
+  const src = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(src);
+    const W = img.naturalWidth, H = img.naturalHeight;
+    if (!W || !H) throw new Error('leer');
+    const k = Math.min(1, 1600 / Math.max(W, H));
+    const w = Math.round(W * k), h = Math.round(H * k);
+    const c = canvas(w, h); const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, w, h);
+    const blob = await toBlob(c, .84);
+    const kt = Math.min(1, 420 / Math.max(W, H));
+    const t = canvas(Math.round(W * kt), Math.round(H * kt)); const tc = t.getContext('2d'); tc.imageSmoothingQuality = 'high'; tc.drawImage(img, 0, 0, t.width, t.height);
+    return { blob, w, h, thumb: t.toDataURL('image/jpeg', .72) };
+  } finally { URL.revokeObjectURL(src); }
+}
+
+/* ---------- Speichern im Konto ---------- */
+const Sync = { mode: 'connecting', col: null, dirty: new Set(), writing: new Set(), again: new Set(), timers: new Map(), retries: new Map(), first: false, loadTimer: 0 };
+function setSync(mode) {
+  Sync.mode = mode;
+  const el = $('#sync');
+  if (el) { el.dataset.mode = mode; el.lastElementChild.textContent = syncText(); }
+}
+const syncText = () => ({ connecting: 'Verbinde …', cloud: 'Im Konto gesichert', local: 'Nur auf diesem Gerät', waiting: 'Konto antwortet nicht' }[Sync.mode]);
+function docData(did) { return did === 'listen' ? S.listen : (S.photos[did.slice(2)] || null); }
+function touchListen() { S.listen.updatedAt = now(); persist('listen'); updateBadge(); }
+function touchPhoto(p) { p.updatedAt = now(); persist('p-' + p.id); }
+function persist(did) {
+  saveLocal();
+  if (!Sync.col) return;
+  Sync.dirty.add(did);
+  clearTimeout(Sync.timers.get(did));
+  Sync.timers.set(did, setTimeout(() => flush(did), 600));
+}
+function fitDoc(d) {
+  if (d.kind !== 'foto' || JSON.stringify(d).length < 230000) return d;
+  d.spots.forEach(s => { s.chat = s.chat.slice(-6); });
+  if (JSON.stringify(d).length >= 230000) d.thumb = '';
+  return d;
+}
+async function flush(did) {
+  Sync.timers.delete(did);
+  if (!Sync.col) return;
+  if (Sync.writing.has(did)) { Sync.again.add(did); return; }
+  Sync.writing.add(did);
+  Sync.dirty.delete(did);
+  try {
+    const data = docData(did);
+    const ref = Sync.col.doc(did);
+    if (data) await ref.set(fitDoc(clone(data))); else await ref.delete();
+    Sync.retries.delete(did);
+    if (Sync.first) setSync('cloud');
+  } catch (e) {
+    const code = e && e.code;
+    const n = (Sync.retries.get(did) || 0) + 1;
+    if ((code === 'unavailable' || code === 'resource_exhausted') && n <= 3) {
+      Sync.retries.set(did, n); Sync.dirty.add(did);
+      setTimeout(() => flush(did), 1500 * n + Math.random() * 800);
+    } else if (code === 'quota_exceeded') {
+      toast('Der Speicher im Konto ist voll. Lösch alte Fotos, dann klappt es wieder.');
+    } else if (code === 'invalid_argument') {
+      toast('Das war zu groß für das Konto. Es bleibt auf diesem Gerät gespeichert.');
+    } else {
+      Sync.col = null; setSync('local');
+      toast('Speichern im Konto klappt gerade nicht. Alles bleibt auf diesem Gerät.');
+    }
+  } finally {
+    Sync.writing.delete(did);
+    if (Sync.again.has(did)) { Sync.again.delete(did); flush(did); }
+  }
+}
+function onSnap(snap) {
+  let changed = false;
+  for (const ch of snap.docChanges()) {
+    const did = ch.doc.id;
+    if (Sync.dirty.has(did) || Sync.writing.has(did)) continue;
+    if (did.startsWith('p-') && UI.ai && UI.ai.photoId === did.slice(2)) continue;
+    if (ch.type === 'removed') {
+      if (did.startsWith('p-') && S.photos[did.slice(2)]) { delete S.photos[did.slice(2)]; changed = true; }
+      continue;
+    }
+    const d = ch.doc.data();
+    if (!d) continue;
+    if (did === 'listen') {
+      if ((d.updatedAt || 0) > (S.listen.updatedAt || 0)) { S.listen = normListen(clone(d)); changed = true; }
+    } else if (d.kind === 'foto' && d.id) {
+      const loc = S.photos[d.id];
+      if (!loc || (d.updatedAt || 0) > (loc.updatedAt || 0)) { S.photos[d.id] = normPhoto(clone(d)); changed = true; }
+    }
+  }
+  if (!snap.metadata.fromCache && !Sync.first) {
+    Sync.first = true;
+    clearTimeout(Sync.loadTimer);
+    const remote = new Map(snap.docs.map(d => [d.id, d.data() || {}]));
+    const r = remote.get('listen');
+    if (S.listen.projects.length && (!r || (S.listen.updatedAt || 0) > (r.updatedAt || 0))) persist('listen');
+    Object.values(S.photos).forEach(p => {
+      const rp = remote.get('p-' + p.id);
+      if (!rp || (p.updatedAt || 0) > (rp.updatedAt || 0)) persist('p-' + p.id);
+    });
+    setSync('cloud');
+  }
+  if (changed) { saveLocal(); softRender(); updateBadge(); }
+}
+async function connect() {
+  const C = window.claude;
+  if (!C || typeof C.use !== 'function') { setSync('local'); AI.state = 'none'; refreshAI(); return; }
+  C.use('sample').then(async fn => {
+    if (!fn) { AI.state = 'none'; refreshAI(); return; }
+    AI.fn = fn;
+    try { const l = await fn.limits(); AI.images = (l && l.images) || null; } catch (e) { AI.images = null; }
+    AI.state = 'ready'; refreshAI();
+  }).catch(() => { AI.state = 'none'; refreshAI(); });
+  Caps.assetsP = C.use('assets').then(a => { Caps.assets = a; return a; }).catch(() => null);
+  let db = null, user = null;
+  try { [db, user] = await Promise.all([C.use('db'), C.use('user')]); } catch (e) { /* ohne Konto */ }
+  if (!db || !user) { setSync('local'); return; }
+  let uid = null;
+  try { uid = await user.id(); } catch (e) { uid = null; }
+  if (!uid) { setSync('local'); return; }
+  try { Sync.col = db.collection('data/users/' + uid); } catch (e) { Sync.col = null; setSync('local'); return; }
+  Sync.loadTimer = setTimeout(() => { if (!Sync.first) setSync('waiting'); }, 10000);
+  Sync.col.onSnapshot(onSnap, () => { clearTimeout(Sync.loadTimer); Sync.col = null; setSync('local'); });
+}
+
+/* ---------- KI ---------- */
+function where(s, n) {
+  if (!n) return 'Ich kann dir das Foto gerade nicht zeigen. Antworte passend zum Raum und zu meiner Frage.';
+  if (s.x == null) return 'Es geht um das ganze Zimmer auf dem Foto.';
+  return n > 1
+    ? 'Bild 1 zeigt das ganze Foto. Die Stelle, um die es geht, ist mit einem gelben Kreis markiert. Bild 2 ist ein vergrößerter Ausschnitt genau dieser Stelle, ohne Markierung.'
+    : 'Die Stelle, um die es geht, ist auf dem Foto mit einem gelben Kreis markiert.';
+}
+function ideasPrompt(p, s, kept, n) {
+  return `Du berätst mich beim Einrichten, Dekorieren und Renovieren meiner Wohnung.
+Raum: ${p.raum}. ${where(s, n)}
+Meine Frage: ${s.frage}
+
+Schau dir genau an, was an dieser Stelle zu sehen ist (Material, Farben, Licht, Platz, Stil), und gib 4 bis 6 konkrete, umsetzbare Vorschläge, die genau dazu passen. Mische schnelle, günstige Ideen mit größeren. Geht es um Renovierung (zum Beispiel Boden verlegen, streichen, tapezieren), nenne im Text die wichtigsten Arbeitsschritte. Wenn etwas in einer Mietwohnung heikel sein kann (zum Beispiel Bohren in Fliesen), sag es kurz.
+${kept.length ? 'Diese Ideen habe ich schon gemerkt, wiederhole sie nicht:\n' + kept.map(i => '- ' + i.titel).join('\n') + '\n' : ''}
+Antworte ausschließlich mit JSON-Zeilen: ein JSON-Objekt pro Zeile, kein Codeblock, kein Text davor oder danach.
+Zeile 1: {"blick": "1 bis 2 Sätze auf Deutsch, was du an der Stelle siehst"}
+Danach eine Zeile pro Vorschlag:
+{"titel": "kurz, höchstens 6 Wörter", "text": "2 bis 4 Sätze auf Deutsch", "aufwand": "leicht" oder "mittel" oder "aufwendig", "kosten": "grobe Spanne in Euro, z. B. 30–80 €", "material": ["Dinge zum Kaufen, kurz, mit Menge wenn sinnvoll"], "bild": "one English sentence describing how this spot looks after the change, for an image edit"}`;
+}
+function chatContext(p, s, n) {
+  return `Du berätst mich beim Einrichten, Dekorieren und Renovieren meiner Wohnung.
+Raum: ${p.raum}. ${where(s, n)}
+Meine erste Frage war: ${s.frage}
+${s.blick ? 'Deine Einschätzung der Stelle: ' + s.blick + '\n' : ''}Deine Vorschläge dazu waren:
+${s.ideas.map((it, k) => `${k + 1}. ${it.titel}: ${it.text}${it.material.length ? ' (Material: ' + it.material.join(', ') + ')' : ''}`).join('\n') || '(noch keine)'}
+
+Beantworte jetzt meine Nachfragen. Antworte auf Deutsch, freundlich, konkret und praktisch, höchstens etwa 200 Wörter. Nutze kurze Absätze, Listen mit "- " oder nummerierte Schritte. Wenn ich Maße nenne, rechne Mengen vor (mit Verschnitt) und sag, wie viele Pakete oder Stück ich kaufen sollte. Keine Überschriften.`;
+}
+function extractObjects(t) {
+  const out = [];
+  let depth = 0, start = -1, inStr = false, escp = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (inStr) { if (escp) escp = false; else if (c === '\\') escp = true; else if (c === '"') inStr = false; continue; }
+    if (c === '"') { if (depth > 0) inStr = true; continue; }
+    if (c === '{') { if (depth === 0) start = i; depth++; }
+    else if (c === '}' && depth > 0) {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        try { const o = JSON.parse(t.slice(start, i + 1)); if (o && typeof o === 'object' && !Array.isArray(o)) out.push(o); } catch (e) { /* unvollständig */ }
+        start = -1;
+      }
+    }
+  }
+  return out;
+}
+function normIdea(o) {
+  const a = String(o.aufwand || '').toLowerCase();
+  return {
+    titel: String(o.titel || '').slice(0, 90),
+    text: String(o.text || '').slice(0, 900),
+    aufwand: a.startsWith('leicht') ? 'leicht' : a.startsWith('aufw') ? 'aufwendig' : 'mittel',
+    kosten: String(o.kosten || '').slice(0, 40),
+    material: (Array.isArray(o.material) ? o.material : []).map(x => String(x).trim().slice(0, 120)).filter(Boolean).slice(0, 12),
+    bild: String(o.bild || '').slice(0, 400),
+    saved: false
+  };
+}
+function aiErr(e) {
+  switch (e && e.code) {
+    case 'not_granted': AI.state = 'denied'; return 'Du hast der App die KI nicht erlaubt. Im Menü der App unter Berechtigungen kannst du das ändern.';
+    case 'sampling_disabled': case 'not_declared': case 'capability_disabled': case 'capability_removed': AI.state = 'none'; return 'Die KI ist in dieser Ansicht nicht verfügbar.';
+    case 'rate_limited': return 'Gerade zu viele Anfragen, oder dein Claude-Limit ist erreicht. Versuch es in ein paar Minuten noch mal.';
+    case 'session_expired': return 'Du bist abgemeldet. Melde dich in Claude neu an und frag dann noch mal.';
+    case 'images_unavailable': AI.images = null; return 'Fotos kann die KI hier nicht sehen. Frag noch mal, dann antwortet sie nur nach deiner Beschreibung.';
+    case 'image_rejected': return 'Dieses Foto kann die KI nicht lesen. Nimm bitte ein anderes Foto.';
+    case 'refused': return 'Darauf antwortet die KI nicht. Formulier die Frage bitte anders.';
+    case 'prompt_too_large': return 'Das war zu viel auf einmal. Stell lieber eine neue Frage an einer anderen Stelle.';
+    case 'empty_completion': return 'Es kam keine Antwort. Formulier die Frage etwas anders.';
+    default: return 'Die Verbindung hat nicht geklappt. Versuch es gleich noch mal.';
+  }
+}
+async function aiImages(p, s) {
+  const max = AI.images ? AI.images.maxCount || 1 : 0;
+  if (!max) return [];
+  const build = img => {
+    const W = img.naturalWidth, H = img.naturalHeight;
+    const k = Math.min(1, 1400 / Math.max(W, H));
+    const w = Math.round(W * k), h = Math.round(H * k);
+    const c = canvas(w, h); const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+    const jobs = [];
+    if (s.x != null) {
+      const cx = s.x * w, cy = s.y * h, r = Math.max(16, Math.min(w, h) * .07);
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.lineWidth = r * .34; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.stroke();
+      ctx.lineWidth = r * .18; ctx.strokeStyle = '#FFD21F'; ctx.stroke();
+    }
+    jobs.push(toBlob(c, .85));
+    if (s.x != null && max >= 2) {
+      const side = Math.min(W, H) * .45;
+      const sx = Math.min(Math.max(s.x * W - side / 2, 0), W - side);
+      const sy = Math.min(Math.max(s.y * H - side / 2, 0), H - side);
+      const o = Math.round(Math.min(side, 900));
+      const c2 = canvas(o, o); c2.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, o, o);
+      jobs.push(toBlob(c2, .88));
+    }
+    return Promise.all(jobs);
+  };
+  try { return await build(await loadImg(await fullSrc(p))); }
+  catch (e) { if (p.thumb) return build(await loadImg(p.thumb)); throw e; }
+}
+async function askIdeas(p, s, frage) {
+  if (AI.state !== 'ready' || UI.ai) return;
+  const kept = s.ideas.filter(i => i.saved);
+  s.frage = String(frage).slice(0, 600);
+  s.error = '';
+  if (!p.spots.includes(s)) { p.spots.push(s); if (UI.draft === s) UI.draft = null; }
+  const ctl = new AbortController();
+  UI.ai = { kind: 'ideas', photoId: p.id, spotId: s.id, ctl, phase: 'prep' };
+  s.ideas = kept.slice();
+  renderSheet(); softRender();
+  let imgs = [];
+  try { imgs = await aiImages(p, s); } catch (e) { imgs = []; }
+  let fresh = [], blick = s.blick;
+  const apply = text => {
+    const objs = extractObjects(text);
+    const b = objs.find(o => typeof o.blick === 'string' && !o.titel);
+    if (b) blick = b.blick.trim().slice(0, 600);
+    fresh = objs.filter(o => o.titel).map(normIdea);
+    s.blick = blick; s.ideas = kept.concat(fresh);
+    if (UI.ai) UI.ai.phase = 'stream';
+    updateSpotOut(p, s);
+  };
+  try {
+    if (ctl.signal.aborted) throw { code: 'cancelled' };
+    UI.ai.phase = 'think'; updateSpotOut(p, s);
+    const opts = { signal: ctl.signal, cache: false, onText: ({ text }) => apply(text) };
+    if (imgs.length) opts.images = imgs;
+    const res = await AI.fn(ideasPrompt(p, s, kept, imgs.length), opts);
+    apply(res.text);
+    if (!fresh.length) s.error = 'Die Antwort kam in einem unerwarteten Format. Tipp auf „Andere Ideen holen“.';
+    else if (res.truncated) s.error = 'Die Antwort wurde abgeschnitten. Für mehr Ideen tipp auf „Andere Ideen holen“.';
+  } catch (e) {
+    if (e && e.code === 'refused') fresh = [];
+    else if (e && e.text) apply(e.text);
+    if (!e || e.code !== 'cancelled') s.error = aiErr(e);
+  } finally {
+    UI.ai = null;
+    s.ideas = kept.concat(fresh); s.blick = blick;
+    touchPhoto(p); renderSheet(); softRender();
+  }
+}
+async function askFollow(p, s, text) {
+  if (AI.state !== 'ready' || UI.ai) return;
+  s.chat.push({ role: 'user', content: text.slice(0, 2000) });
+  s.chatError = '';
+  UI.drafts['f-' + s.id] = '';
+  const ctl = new AbortController();
+  UI.ai = { kind: 'chat', photoId: p.id, spotId: s.id, ctl, text: '' };
+  renderSheet();
+  const box = $('#sheetBody'); if (box) box.scrollTop = box.scrollHeight;
+  let imgs = [];
+  try { imgs = await aiImages(p, s); } catch (e) { imgs = []; }
+  try {
+    if (ctl.signal.aborted) throw { code: 'cancelled' };
+    const turns = [{ role: 'user', content: chatContext(p, s, imgs.length) }].concat(s.chat.slice(-12).map(m => ({ role: m.role, content: m.content })));
+    const opts = { signal: ctl.signal, cache: false, onText: ({ text }) => { if (UI.ai) UI.ai.text = text; updateChat(p, s); } };
+    if (imgs.length) opts.images = imgs;
+    const res = await AI.fn(turns, opts);
+    s.chat.push({ role: 'assistant', content: res.text.slice(0, 6000) });
+  } catch (e) {
+    if (e && e.text && e.code !== 'refused') s.chat.push({ role: 'assistant', content: e.text.slice(0, 6000) + '\n\n(Antwort abgebrochen)' });
+    if (!e || e.code !== 'cancelled') s.chatError = aiErr(e);
+  } finally {
+    UI.ai = null;
+    if (s.chat.length > 24) s.chat = s.chat.slice(-24);
+    touchPhoto(p); renderSheet();
+  }
+}
+function grokPrompt(p, idea) {
+  const room = ROOM_EN[p.raum] || 'room';
+  return `Edit the uploaded photo of my ${room}. ${idea.bild || idea.titel} Keep everything else exactly as it is: same room, camera angle, perspective, furniture and lighting. Photorealistic interior photo, natural light.`;
+}
+
+/* ---------- Markdown light ---------- */
+function md(t) {
+  const lines = esc(t).split('\n');
+  let h = '', list = '';
+  const inl = s => s.replace(/^#{1,6}\s*/, '').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  const close = () => { if (list) { h += '</' + list + '>'; list = ''; } };
+  for (const raw of lines) {
+    const l = raw.trimEnd();
+    let m;
+    if ((m = l.match(/^\s*[-*•]\s+(.*)$/))) { if (list !== 'ul') { close(); h += '<ul>'; list = 'ul'; } h += '<li>' + inl(m[1]) + '</li>'; }
+    else if ((m = l.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== 'ol') { close(); h += '<ol>'; list = 'ol'; } h += '<li>' + inl(m[1]) + '</li>'; }
+    else if (l.trim()) { close(); h += '<p>' + inl(l) + '</p>'; }
+  }
+  close();
+  return h;
+}
+
+/* ---------- Bausteine ---------- */
+function zoomStyle(p, s) {
+  const u = fullUrl(p);
+  if (!u) return '';
+  if (s && s.x != null) return `background-image:url(&quot;${esc(u)}&quot;);background-size:260%;background-position:${(s.x * 100).toFixed(1)}% ${(s.y * 100).toFixed(1)}%`;
+  return `background-image:url(&quot;${esc(u)}&quot;);background-size:cover;background-position:center`;
+}
+function zoomBox(p, s, cls = '') {
+  return `<span class="zoom ${cls}" data-zoom="${esc(p.id)}" style="${zoomStyle(p, s)}" aria-hidden="true">${s && s.x != null ? `<i class="zoom-ring" style="left:${(s.x * 100).toFixed(1)}%;top:${(s.y * 100).toFixed(1)}%"></i>` : ''}</span>`;
+}
+function spotNo(p, s) {
+  const i = p.spots.indexOf(s);
+  return i >= 0 ? i + 1 : p.spots.length + 1;
+}
+function ideaCard(p, s, it, i, live) {
+  return `<article class="idea" data-p="${esc(p.id)}" data-s="${esc(s.id)}" data-i="${i}">
+    <div class="idea-top"><h3>${esc(it.titel)}</h3>${live ? '' : `<button class="star ${it.saved ? 'on' : ''}" data-act="star" aria-pressed="${it.saved}" aria-label="${it.saved ? 'Nicht mehr merken' : 'Idee merken'}">${ic('star')}</button>`}</div>
+    <div class="idea-meta"><span class="pill a-${it.aufwand}">${esc(it.aufwand)}</span>${it.kosten ? `<span class="cost">${esc(it.kosten)}</span>` : ''}</div>
+    <p>${esc(it.text)}</p>
+    ${it.material.length ? `<div class="mat"><div class="eyebrow">Du brauchst</div><ul>${it.material.map(m => `<li>${esc(m)}</li>`).join('')}</ul></div>` : ''}
+    ${live ? '' : `<div class="idea-acts">${it.material.length ? `<button class="btn small" data-act="matToList">${ic('cart')}Auf Einkaufsliste</button>` : ''}<button class="btn small ghost" data-act="grok">${ic('copy')}Grok-Prompt</button></div>`}
+  </article>`;
+}
+function loader(text, stop = true) {
+  return `<div class="loading" role="status"><span class="tape-load" aria-hidden="true"></span><span>${esc(text)}</span>${stop ? '<button class="btn small ghost" data-act="stopAI">Stopp</button>' : ''}</div>`;
+}
+function aiNoteText() {
+  if (AI.state === 'pending') return 'Die KI wird verbunden …';
+  if (AI.state === 'denied') return 'Du hast der App die KI nicht erlaubt. Im Menü der App unter Berechtigungen kannst du das ändern.';
+  if (AI.state === 'none') return 'Die KI ist hier nicht verfügbar. Öffne Wohnwerk in der Claude-App oder auf claude.ai, dann klappt das Fragen.';
+  if (!AI.images) return 'Fotos kann die KI in dieser Ansicht nicht sehen. Sie antwortet dann nur nach Raum und Frage.';
+  return '';
+}
+const isFloor = t => /boden|laminat|vinyl|parkett|fliese|teppich|dielen/i.test(t || '');
+
+/* ---------- Ansichten ---------- */
+function renderHeader() {
+  const h = $('#top');
+  if (UI.view === 'foto') {
+    const p = S.photos[UI.photoId];
+    h.className = 'wrap top-in nav';
+    h.innerHTML = `<button class="back" data-act="back">${ic('back')}Räume</button><div class="h-title">${esc(p ? p.raum : '')}</div><button class="h-btn" data-act="editPhoto">Bearbeiten</button>`;
+  } else if (UI.view === 'projekt') {
+    const pr = proj(UI.projectId);
+    h.className = 'wrap top-in nav';
+    h.innerHTML = `<button class="back" data-act="back">${ic('back')}Einkauf</button><div class="h-title">${esc(pr ? pr.name : '')}</div><span></span>`;
+  } else {
+    h.className = 'wrap top-in';
+    h.innerHTML = `<div class="brand"><span class="brand-name">Wohnwerk</span><span class="tape-mini" aria-hidden="true"></span></div><span class="sync" id="sync" data-mode="${Sync.mode}"><i></i><span>${syncText()}</span></span>`;
+  }
+}
+function renderTabs() {
+  const cur = { foto: 'raeume', projekt: 'einkauf' }[UI.view] || UI.view;
+  const open = openCount();
+  $('#tabs').innerHTML = [['raeume', 'Räume', 'home'], ['ideen', 'Ideen', 'star'], ['einkauf', 'Einkauf', 'cart']].map(([v, l, i]) =>
+    `<button class="tab" data-act="tab" data-tab="${v}" aria-current="${cur === v ? 'page' : 'false'}"><span class="ic-wrap">${ic(i)}</span>${l}${v === 'einkauf' && open ? `<span class="badge" aria-label="${open} offen">${open}</span>` : ''}</button>`).join('');
+}
+function updateBadge() { renderTabs(); }
+function render() {
+  renderHeader();
+  ['raeume', 'ideen', 'einkauf', 'foto', 'projekt'].forEach(v => { $('#v-' + v).hidden = UI.view !== v; });
+  renderTabs();
+  ({ raeume: renderRaeume, ideen: renderIdeen, einkauf: renderEinkauf, foto: renderFoto, projekt: renderProjekt })[UI.view]();
+}
+function softRender() {
+  if (UI.view === 'raeume') renderRaeume();
+  else if (UI.view === 'foto') { renderHeader(); renderFoto(); }
+  else if (UI.view === 'ideen') renderIdeen();
+  else if (UI.view === 'einkauf') renderEinkauf();
+  else if (UI.view === 'projekt') { const a = document.activeElement; if (!a || !/^(pNotiz|pName|addItem)$/.test(a.id)) { renderHeader(); renderProjekt(); } }
+}
+function go(view) {
+  UI.view = view;
+  if (['raeume', 'ideen', 'einkauf'].includes(view)) { try { history.replaceState(null, '', '#' + view); } catch (e) { /* egal */ } }
+  render();
+  window.scrollTo(0, 0);
+}
+
+function renderRaeume() {
+  const photos = Object.values(S.photos).sort((a, b) => b.createdAt - a.createdAt);
+  const groups = new Map();
+  photos.forEach(p => { if (!groups.has(p.raum)) groups.set(p.raum, []); groups.get(p.raum).push(p); });
+  let h = `<section class="add-card">
+    <div><h1 class="h1">Deine Wohnung</h1><p class="lead">Mach ein Foto von der Ecke, die du verändern willst. Dann tippst du auf die Stelle und fragst.</p></div>
+    <div class="add-btns">
+      <label class="btn primary file"><input type="file" accept="image/*" capture="environment" id="inCam" class="vh">${ic('cam')}Foto aufnehmen</label>
+      <label class="btn file"><input type="file" accept="image/*" id="inLib" class="vh">${ic('img')}Aus Fotos wählen</label>
+    </div>
+  </section>`;
+  if (!photos.length) {
+    h += `<h2 class="h2">So funktioniert's</h2><ol class="steps">
+      <li><b>Foto machen</b><span>Zum Beispiel vom Flur, in dem der Boden neu soll.</span></li>
+      <li><b>Stelle antippen</b><span>Tipp auf die Wand, den Boden oder die Ecke, um die es geht.</span></li>
+      <li><b>Ideen holen</b><span>Die KI schaut sich die Stelle an und macht Vorschläge. Was du dafür brauchst, kommt mit einem Tipp auf deine Einkaufsliste.</span></li>
+    </ol>`;
+  } else {
+    for (const [raum, list] of groups) {
+      h += `<section class="room"><h2 class="h2">${esc(raum)} <span class="count">${list.length}</span></h2><div class="tiles">${list.map(p => {
+        const n = p.spots.length;
+        return `<button class="tile" data-act="openPhoto" data-id="${esc(p.id)}"><img src="${esc(p.thumb || fullUrl(p))}" alt="Foto ${esc(raum)}" loading="lazy"><span class="tile-meta"><b>${n ? plural(n, 'Frage', 'Fragen') : 'Noch keine Frage'}</b><span>${fmtDate(p.createdAt)}</span></span></button>`;
+      }).join('')}</div></section>`;
+    }
+  }
+  $('#v-raeume').innerHTML = h;
+}
+
+function renderFoto() {
+  const p = S.photos[UI.photoId];
+  if (!p) { UI.view = 'raeume'; render(); return; }
+  const top = topSheet();
+  const draft = UI.draft && top && top.type === 'spot' && top.spotId === UI.draft.id ? UI.draft : null;
+  const pins = p.spots.map((s, i) => s.x == null ? '' : `<button class="pin" style="left:${(s.x * 100).toFixed(2)}%;top:${(s.y * 100).toFixed(2)}%" data-act="openSpot" data-id="${esc(s.id)}" aria-label="Stelle ${i + 1}: ${esc(s.frage)}">${i + 1}</button>`).join('');
+  const dpin = draft && draft.x != null ? `<span class="pin draft" style="left:${(draft.x * 100).toFixed(2)}%;top:${(draft.y * 100).toFixed(2)}%" aria-hidden="true">${p.spots.length + 1}</span>` : '';
+  let h = `<div class="stage" data-act="tapPhoto"><img class="photo" data-full="${esc(p.id)}" data-thumb="1" src="${esc(fullUrl(p))}" alt="Foto ${esc(p.raum)}" draggable="false">${pins}${dpin}</div>
+    <div class="stage-bar"><p class="hint">${ic('target')}Tippe auf eine Stelle im Foto.</p><button class="btn small" data-act="askRoom">Ganzes Zimmer fragen</button></div>
+    <section><h2 class="h2">Deine Fragen${p.spots.length ? ` <span class="count">${p.spots.length}</span>` : ''}</h2>`;
+  if (!p.spots.length) h += `<p class="muted">Noch keine. Tipp zum Beispiel auf den Boden und wähl „Boden neu verlegen“.</p>`;
+  else h += `<div class="spot-list">${p.spots.map((s, i) => {
+    const saved = s.ideas.filter(x => x.saved).length;
+    const busy = UI.ai && UI.ai.spotId === s.id;
+    return `<button class="spot-row" data-act="openSpot" data-id="${esc(s.id)}"><span class="pin-num ${s.x == null ? 'room' : ''}">${s.x == null ? ic('home') : i + 1}</span><span class="spot-txt"><b>${esc(s.frage)}</b><small>${busy ? 'KI antwortet …' : plural(s.ideas.length, 'Idee', 'Ideen') + (saved ? ' · ' + saved + ' gemerkt' : '') + (s.chat.length ? ' · nachgefragt' : '')}</small></span><span class="chev">${ic('next')}</span></button>`;
+  }).join('')}</div>`;
+  h += '</section>';
+  $('#v-foto').innerHTML = h;
+}
+
+function savedIdeas() {
+  const list = [];
+  Object.values(S.photos).forEach(p => p.spots.forEach(s => s.ideas.forEach((it, i) => { if (it.saved) list.push({ p, s, it, i }); })));
+  return list.sort((a, b) => (b.it.savedAt || 0) - (a.it.savedAt || 0));
+}
+function renderIdeen() {
+  const list = savedIdeas();
+  let h = `<h1 class="h1">Gemerkte Ideen</h1><p class="lead">Alles, was du mit dem Stern markiert hast. Von hier kommt das Material direkt auf die Einkaufsliste.</p>`;
+  if (!list.length) h += `<div class="empty"><b>Noch nichts gemerkt</b>Tipp bei einer Idee auf den Stern, dann landet sie hier.</div>`;
+  else h += `<div class="saved-list">${list.map(({ p, s, it, i }) => `<div>
+      <button class="saved-head" data-act="gotoSpot" data-p="${esc(p.id)}" data-s="${esc(s.id)}">${zoomBox(p, s, 'sm')}<span><b>${esc(p.raum)}</b> · ${esc(s.frage)}</span></button>
+      ${ideaCard(p, s, it, i, false)}
+    </div>`).join('')}</div>`;
+  $('#v-ideen').innerHTML = h;
+}
+
+const proj = id => S.listen.projects.find(x => x.id === id);
+const openCount = () => S.listen.projects.reduce((n, pr) => n + pr.items.filter(i => !i.done).length, 0);
+function newProject(name, raum) {
+  const pr = { id: newId(), name: String(name).slice(0, 80), raum: raum || '', notiz: '', items: [], createdAt: now() };
+  S.listen.projects.unshift(pr);
+  return pr;
+}
+const newItem = t => ({ id: newId(), t: String(t).slice(0, 200), done: false, at: now() });
+function renderEinkauf() {
+  const projects = S.listen.projects;
+  const open = openCount();
+  let h = `<h1 class="h1">Einkauf & Projekte</h1><p class="lead">Für jedes Vorhaben eine Liste. Im Baumarkt schaltest du auf „Alles offen“.</p>
+    <div class="seg" role="group" aria-label="Ansicht"><button data-act="shop" data-m="projekte" aria-pressed="${UI.shop === 'projekte'}">Projekte</button><button data-act="shop" data-m="offen" aria-pressed="${UI.shop === 'offen'}">Alles offen${open ? ` <span class="count">${open}</span>` : ''}</button></div>`;
+  if (UI.shop === 'projekte') {
+    h += `<form class="new-proj" data-form="newProject"><input id="npName" type="text" placeholder="Neues Projekt, z. B. Flur – neuer Boden" aria-label="Name für ein neues Projekt" autocomplete="off"><button class="btn primary" type="submit">${ic('plus')}Anlegen</button></form>`;
+    if (!projects.length) h += `<div class="eyebrow">Schnell anlegen</div><div class="chips">${VORLAGEN.map(([n, r]) => `<button class="chip" data-act="tpl" data-name="${esc(n)}" data-raum="${esc(r)}">${esc(n)}</button>`).join('')}</div>`;
+    else h += `<div class="projs">${projects.map(pr => {
+      const done = pr.items.filter(i => i.done).length, all = pr.items.length;
+      const pct = all ? Math.round(done / all * 100) : 0;
+      return `<button class="proj" data-act="openProject" data-id="${esc(pr.id)}">
+        <span class="proj-top"><b>${esc(pr.name)}</b>${pr.raum ? `<span class="tag">${esc(pr.raum)}</span>` : ''}</span>
+        <span class="tape" aria-hidden="true"><i style="width:${pct}%"></i></span>
+        <span class="proj-meta">${all ? `${all - done} offen · ${done} gekauft` : 'Noch leer'}</span>
+      </button>`;
+    }).join('')}</div>`;
+    h += `<button class="tool" data-act="openBoden">${ic('ruler')}<span><b>Bodenrechner</b><span>Pakete, Dämmung und Sockelleisten für Laminat oder Vinyl ausrechnen.</span></span></button>`;
+  } else {
+    const groups = projects.map(pr => ({ pr, items: pr.items.filter(i => !i.done) })).filter(g => g.items.length);
+    if (!groups.length) h += `<div class="empty"><b>Nichts mehr offen</b>Alles gekauft. Neue Sachen trägst du im jeweiligen Projekt ein.</div>`;
+    else h += groups.map(({ pr, items }) => `<section class="group card"><h2 class="h2">${esc(pr.name)}</h2><ul class="items">${items.map(it => itemRow(pr, it)).join('')}</ul></section>`).join('');
+  }
+  $('#v-einkauf').innerHTML = h;
+}
+function itemRow(pr, it) {
+  return `<li class="item ${it.done ? 'done' : ''}" data-pr="${esc(pr.id)}" data-id="${esc(it.id)}"><button class="check" data-act="toggleItem" aria-pressed="${it.done}" aria-label="${it.done ? 'Wieder offen' : 'Gekauft'}: ${esc(it.t)}">${ic('check')}</button><span class="item-t">${esc(it.t)}</span><button class="del" data-act="delItem" aria-label="${esc(it.t)} löschen">${ic('x')}</button></li>`;
+}
+function itemsHTML(pr) {
+  const open = pr.items.filter(i => !i.done), done = pr.items.filter(i => i.done);
+  let h = open.length ? `<ul class="items">${open.map(it => itemRow(pr, it)).join('')}</ul>` : `<p class="muted">${done.length ? 'Alles gekauft.' : 'Noch nichts auf der Liste.'}</p>`;
+  if (done.length) h += `<details class="done-list"${UI.openDone ? ' open' : ''}><summary>Gekauft (${done.length})</summary><ul class="items">${done.map(it => itemRow(pr, it)).join('')}</ul></details>`;
+  return h;
+}
+function renderProjekt() {
+  const pr = proj(UI.projectId);
+  if (!pr) { UI.view = 'einkauf'; render(); return; }
+  $('#v-projekt').innerHTML = `
+    <section class="card">
+      <label class="lbl" for="pName">Projekt</label>
+      <input id="pName" type="text" class="title-input" value="${esc(pr.name)}" autocomplete="off">
+      <div class="eyebrow section-gap">Raum</div>
+      <div class="chips">${RAEUME.map(r => `<button class="chip" data-act="projRaum" data-r="${esc(r)}" aria-pressed="${pr.raum === r}">${esc(r)}</button>`).join('')}</div>
+    </section>
+    <section class="card">
+      <h2 class="h2">${ic('cart')}Einkaufsliste</h2>
+      <form class="add-row" data-form="addItem"><input id="addItem" type="text" placeholder="Was brauchst du? z. B. 2 Rollen Malerkrepp" aria-label="Neue Sache für die Liste" autocomplete="off" enterkeyhint="done"><button class="btn primary" type="submit" aria-label="Hinzufügen">${ic('plus')}</button></form>
+      <div id="pItems">${itemsHTML(pr)}</div>
+    </section>
+    <section class="card">
+      <h2 class="h2">Notizen</h2>
+      <label class="vh" for="pNotiz">Notizen zum Projekt</label>
+      <textarea id="pNotiz" rows="5" placeholder="Maße, Farbnummern, Händler, Ideen …">${esc(pr.notiz)}</textarea>
+      <p class="saved-hint">Wird automatisch gespeichert.</p>
+    </section>
+    <div class="row-btns"><button class="btn" data-act="openBoden">${ic('ruler')}Bodenrechner</button><button class="btn ghost danger" data-act="delProject">Projekt löschen</button></div>`;
+}
+function refreshItems(pr) {
+  const box = $('#pItems');
+  if (UI.view === 'projekt' && box && pr.id === UI.projectId) { UI.openDone = !!$('details.done-list[open]'); box.innerHTML = itemsHTML(pr); }
+  else if (UI.view === 'einkauf') renderEinkauf();
+  updateBadge();
+}
+
+/* ---------- Blätter ---------- */
+const topSheet = () => UI.stack[UI.stack.length - 1] || null;
+function openSheet(entry) {
+  const prev = topSheet();
+  if (prev) prev.scroll = $('#sheetBody').scrollTop;
+  UI.stack.push(entry);
+  renderSheet(true);
+}
+function closeSheet(all) {
+  const gone = all ? UI.stack.splice(0) : [UI.stack.pop()];
+  gone.forEach(g => {
+    if (!g) return;
+    if (g.type === 'spot' && UI.draft && UI.draft.id === g.spotId) UI.draft = null;
+    if (g.type === 'newPhoto' && !UI.saving) { if (UI.pending && UI.pending.url) URL.revokeObjectURL(UI.pending.url); UI.pending = null; }
+  });
+  renderSheet();
+  if (UI.view === 'foto') renderFoto();
+}
+function renderSheet(anim) {
+  const wrap = $('#sheet'), box = $('#sheetBody');
+  while (UI.stack.length) {
+    const top = topSheet();
+    const html = SHEETS[top.type] ? SHEETS[top.type](top) : null;
+    if (html != null) {
+      const keep = anim ? 0 : (top.scroll != null ? top.scroll : box.scrollTop);
+      top.scroll = null;
+      box.innerHTML = html;
+      wrap.hidden = false;
+      document.body.classList.add('locked');
+      if (anim) { box.classList.remove('anim'); void box.offsetWidth; box.classList.add('anim'); box.scrollTop = 0; box.focus({ preventScroll: true }); }
+      else box.scrollTop = keep;
+      $$('textarea', box).forEach(autosize);
+      return;
+    }
+    UI.stack.pop();
+  }
+  wrap.hidden = true;
+  document.body.classList.remove('locked');
+}
+function refreshAI() { const t = topSheet(); if (t && t.type === 'spot') renderSheet(); }
+function sheetHead(title, sub, extra = '') {
+  return `<div class="sh-head ${extra ? '' : 'plain'}">${extra}<div><h2 class="sh-title">${esc(title)}</h2>${sub ? `<p class="sh-sub">${esc(sub)}</p>` : ''}</div><button class="x" data-act="closeSheet" aria-label="Schließen">${ic('x')}</button></div>`;
+}
+function getSpot(p, id) { return p ? (p.spots.find(x => x.id === id) || (UI.draft && UI.draft.id === id ? UI.draft : null)) : null; }
+function spotOut(p, s) {
+  const busy = UI.ai && UI.ai.kind === 'ideas' && UI.ai.spotId === s.id;
+  let h = `<div class="q-bubble">${esc(s.frage)}</div>`;
+  if (s.blick) h += `<div class="blick"><div class="eyebrow">Das sehe ich</div><p>${esc(s.blick)}</p></div>`;
+  if (s.ideas.length) h += `<div class="ideas">${s.ideas.map((it, i) => ideaCard(p, s, it, i, busy && !it.saved)).join('')}</div>`;
+  if (busy) h += loader(s.ideas.length > s.ideas.filter(x => x.saved).length ? 'Weitere Ideen kommen …' : (UI.ai.phase === 'prep' ? 'Bereite das Foto vor …' : 'Schaut sich dein Foto an …'));
+  if (s.error && !busy) h += `<p class="err">${esc(s.error)}</p>`;
+  if (!busy && isFloor(s.frage)) h += `<button class="tool tool-inline" data-act="openBoden" data-raum="${esc(p.raum)}">${ic('ruler')}<span><b>Material berechnen</b><span>Mit dem Bodenrechner: Maße eingeben, Pakete und Leisten auf die Liste.</span></span></button>`;
+  return h;
+}
+function chatHTML(s) {
+  const live = UI.ai && UI.ai.kind === 'chat' && UI.ai.spotId === s.id ? UI.ai : null;
+  if (!s.chat.length && !live && !s.chatError) return '';
+  let h = '<div class="eyebrow chat-label">Nachgefragt</div><div class="chat">';
+  h += s.chat.map(m => `<div class="msg ${m.role === 'user' ? 'user' : 'assistant'}">${m.role === 'user' ? esc(m.content) : md(m.content)}</div>`).join('');
+  if (live) h += live.text ? `<div class="msg assistant">${md(live.text)}</div>` : `<div class="msg assistant"><span class="thinking"><span class="tape-load" aria-hidden="true"></span>Denkt nach …</span></div>`;
+  h += '</div>';
+  if (live) h += '<div class="sh-foot"><button class="link" data-act="stopAI">Antwort stoppen</button></div>';
+  if (s.chatError && !live) h += `<p class="err">${esc(s.chatError)}</p>`;
+  return h;
+}
+function updateSpotOut(p, s) {
+  const t = topSheet();
+  if (t && t.type === 'spot' && t.spotId === s.id) { const el = $('#sp-out'); if (el) el.innerHTML = spotOut(p, s); }
+}
+function updateChat(p, s) {
+  const t = topSheet();
+  if (t && t.type === 'spot' && t.spotId === s.id) { const el = $('#sp-chat'); if (el) el.innerHTML = chatHTML(s); }
+}
+
+const SHEETS = {
+  spot({ photoId, spotId }) {
+    const p = S.photos[photoId], s = getSpot(p, spotId);
+    if (!s) return null;
+    const isNew = !p.spots.includes(s);
+    const title = s.x == null ? 'Das ganze Zimmer' : (isNew ? 'Diese Stelle' : 'Stelle ' + spotNo(p, s));
+    const head = sheetHead(title, p.raum, zoomBox(p, s));
+    const note = aiNoteText();
+    if (!s.frage) {
+      return head + `<form class="ask" data-form="ask">
+        <div class="eyebrow">Schnell fragen</div>
+        <div class="chips">${FRAGEN.map(([l, q]) => `<button type="button" class="chip" data-act="chip" data-q="${esc(q)}" aria-pressed="${UI.drafts.ask === q}">${esc(l)}</button>`).join('')}</div>
+        <label class="lbl" for="askText">Oder frag selbst</label>
+        <textarea id="askText" rows="3" placeholder="Was könnte ich hier machen?">${esc(UI.drafts.ask || '')}</textarea>
+        ${note ? `<p class="note">${esc(note)}</p>` : ''}
+        ${UI.ai ? '<p class="note">Die KI antwortet gerade noch auf eine andere Frage. Gleich geht es weiter.</p>' : ''}
+        <button class="btn primary wide" type="submit" ${AI.state !== 'ready' || UI.ai ? 'disabled' : ''}>Ideen holen</button>
+      </form>`;
+    }
+    const busy = !!UI.ai;
+    return head + `<div id="sp-out">${spotOut(p, s)}</div>
+      <div id="sp-chat">${chatHTML(s)}</div>
+      ${AI.state === 'ready' ? `<form class="follow" data-form="follow"><label class="vh" for="followText">Nachfragen</label><textarea id="followText" rows="1" placeholder="Nachfragen, z. B. Wie viel brauche ich bei 6 m²?">${esc(UI.drafts['f-' + s.id] || '')}</textarea><button class="send" type="submit" aria-label="Senden" ${busy ? 'disabled' : ''}>${ic('up')}</button></form>` : `<p class="note">${esc(note)}</p>`}
+      <div class="sh-foot"><button class="link" data-act="moreIdeas" ${busy || AI.state !== 'ready' ? 'disabled' : ''}>Andere Ideen holen</button><button class="link danger" data-act="delSpot" ${UI.ai && UI.ai.spotId === s.id ? 'disabled' : ''}>Frage löschen</button></div>`;
+  },
+  newPhoto() {
+    const f = UI.pending;
+    if (!f) return null;
+    return sheetHead('Neues Foto', 'Zu welchem Raum gehört es?') + `<img class="preview" src="${esc(f.url)}" alt="Vorschau des neuen Fotos">
+      <form data-form="newPhoto">${roomPicker()}<button class="btn primary wide" type="submit" ${UI.saving ? 'disabled' : ''}>${UI.saving ? 'Speichert …' : 'Speichern und Stelle antippen'}</button></form>`;
+  },
+  editPhoto({ photoId }) {
+    const p = S.photos[photoId];
+    if (!p) return null;
+    return sheetHead('Foto bearbeiten', p.raum) + `<form data-form="editPhoto">${roomPicker()}<button class="btn primary wide" type="submit">Speichern</button></form>
+      <div class="sh-foot"><span></span><button class="link danger" data-act="delPhoto">Foto löschen</button></div>`;
+  },
+  pick({ photoId, spotId, i }) {
+    const p = S.photos[photoId], s = getSpot(p, spotId), idea = s && s.ideas[i];
+    if (!idea) return null;
+    const projects = S.listen.projects;
+    const same = projects.find(pr => pr.raum === p.raum);
+    const def = same ? same.id : '__new';
+    return sheetHead('Auf die Einkaufsliste', idea.titel) + `<form data-form="pick">
+      <div class="eyebrow">Was brauchst du davon?</div>
+      <ul class="checks">${idea.material.map((m, k) => `<li><label class="check-row"><input type="checkbox" name="mat" value="${k}" checked><span>${esc(m)}</span></label></li>`).join('')}</ul>
+      <div class="eyebrow">Für welches Projekt?</div>
+      <div class="radio-list">
+        ${projects.map(pr => `<label class="check-row"><input type="radio" name="proj" value="${esc(pr.id)}" ${pr.id === def ? 'checked' : ''}><span>${esc(pr.name)}${pr.raum ? ` <small>${esc(pr.raum)}</small>` : ''}</span></label>`).join('')}
+        <label class="check-row"><input type="radio" name="proj" value="__new" ${def === '__new' ? 'checked' : ''}><span>Neues Projekt</span></label>
+        <input id="pickNew" type="text" value="${esc(p.raum + ' – ' + idea.titel)}" aria-label="Name des neuen Projekts" autocomplete="off">
+      </div>
+      <button class="btn primary wide" type="submit">Hinzufügen</button>
+    </form>`;
+  },
+  copy({ text }) {
+    return sheetHead('Grok-Prompt', 'So siehst du die Idee in deinem Raum') + `<p>Kopier den Text, öffne Grok, lade dein Foto hoch und füg den Prompt ein.</p>
+      <label class="vh" for="copyText">Prompt</label><textarea id="copyText" rows="6" readonly>${esc(text)}</textarea>
+      <button class="btn primary wide section-gap" data-act="copyAgain">${ic('copy')}Kopieren</button>`;
+  },
+  boden() {
+    const b = UI.boden;
+    const projects = S.listen.projects;
+    const r = calcBoden(b);
+    return sheetHead('Bodenrechner', 'Wie viel Material brauchst du?', `<span class="zoom" style="display:grid;place-items:center;background:var(--band);color:var(--band-ink)">${ic('ruler')}</span>`) + `<form data-form="boden">
+      <div class="eyebrow">Fläche in Metern</div>
+      <p class="muted" style="margin:-4px 0 10px;font-size:.9rem">Miss Länge und Breite. Ein Flur mit Ecke? Teil ihn in zwei Rechtecke.</p>
+      <div class="rects">${b.rects.map((x, k) => `<div class="rect">
+        <input id="bl-${k}" type="text" inputmode="decimal" placeholder="Länge" value="${esc(x.l)}" aria-label="Länge Fläche ${k + 1} in Metern" autocomplete="off">
+        <span>×</span>
+        <input id="bb-${k}" type="text" inputmode="decimal" placeholder="Breite" value="${esc(x.b)}" aria-label="Breite Fläche ${k + 1} in Metern" autocomplete="off">
+        <span>m</span>
+        ${k ? `<button type="button" class="del" data-act="delRect" data-k="${k}" aria-label="Fläche ${k + 1} entfernen">${ic('x')}</button>` : '<span></span>'}
+      </div>`).join('')}</div>
+      <button type="button" class="link" data-act="addRect">+ Weitere Fläche</button>
+      <div class="eyebrow section-gap">Verlegeart</div>
+      <div class="radios">${ARTEN.map(([v, l, p]) => `<label class="radio"><input type="radio" name="art" value="${v}" class="vh" ${b.art === v ? 'checked' : ''}><span><b>${l}</b><small>${Math.round(p * 100)} % Verschnitt</small></span></label>`).join('')}</div>
+      <div class="grid2">
+        <div><label class="lbl" for="bPaket">Inhalt pro Paket (m²)</label><input id="bPaket" type="text" inputmode="decimal" value="${esc(b.paket)}" autocomplete="off"></div>
+        <div><label class="lbl" for="bPreis">Preis pro m² (€)</label><input id="bPreis" type="text" inputmode="decimal" value="${esc(b.preis)}" placeholder="optional" autocomplete="off"></div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="bDaemm" ${b.daemm ? 'checked' : ''}>Trittschalldämmung dazu</label>
+      <div class="grid2">
+        <div><label class="lbl" for="bWall">Wandlänge für Leisten (m)</label><input id="bWall" type="text" inputmode="decimal" value="${esc(b.wall)}" placeholder="${r.autoWall ? 'auto: ' + fmtN(r.autoWall) : 'z. B. 12'}" autocomplete="off"></div>
+        <div><label class="lbl" for="bTuer">Türen</label><input id="bTuer" type="text" inputmode="numeric" value="${esc(b.tueren)}" autocomplete="off"></div>
+      </div>
+      <div class="result" id="bodenOut" aria-live="polite">${bodenResult(r)}</div>
+      <div class="eyebrow">Zubehör mit auf die Liste</div>
+      <div class="chips">${EXTRAS.map(([k, l]) => `<label class="chip"><input type="checkbox" data-extra="${k}" ${b.extras[k] ? 'checked' : ''}>${esc(l)}</label>`).join('')}</div>
+      <label class="lbl" for="bTarget">Auf welche Liste?</label>
+      <select id="bTarget">${projects.map(pr => `<option value="${esc(pr.id)}" ${b.target === pr.id ? 'selected' : ''}>${esc(pr.name)}</option>`).join('')}<option value="__new" ${b.target === '__new' ? 'selected' : ''}>Neues Projekt …</option></select>
+      <input id="bNew" type="text" class="section-gap" value="${esc(b.newName)}" aria-label="Name des neuen Projekts" ${b.target === '__new' ? '' : 'hidden'} autocomplete="off">
+      <button class="btn primary wide section-gap" type="submit">${ic('cart')}Auf Einkaufsliste</button>
+    </form>`;
+  }
+};
+function roomPicker() {
+  const cur = UI.roomChoice || '';
+  const custom = cur && !RAEUME.includes(cur);
+  return `<div class="chips">${RAEUME.map(r => `<button type="button" class="chip" data-act="pickRoom" data-r="${esc(r)}" aria-pressed="${r === cur}">${esc(r)}</button>`).join('')}</div>
+    <label class="lbl" for="roomCustom">Anderer Raum</label><input id="roomCustom" type="text" placeholder="z. B. Abstellkammer" value="${custom ? esc(cur) : ''}" autocomplete="off" style="margin-bottom:16px">`;
+}
+
+/* ---------- Bodenrechner ---------- */
+function freshBoden(projectId, raum) {
+  const old = UI.boden || {};
+  const r = raum || (proj(projectId) || {}).raum || 'Flur';
+  return {
+    rects: [{ l: '', b: '' }], art: old.art || 'versetzt', paket: old.paket || '2,2', preis: old.preis || '', daemm: old.daemm !== false,
+    wall: '', tueren: '1', extras: old.extras || { keile: true, profil: true, set: false, folie: false },
+    target: projectId || (S.listen.projects.find(pr => pr.raum === r) || {}).id || '__new', newName: 'Boden ' + r
+  };
+}
+function calcBoden(b) {
+  const rects = b.rects.filter(x => num(x.l) && num(x.b));
+  const area = rects.reduce((s, x) => s + num(x.l) * num(x.b), 0);
+  const v = (ARTEN.find(a => a[0] === b.art) || ARTEN[1])[2];
+  const need = area * (1 + v);
+  const pack = num(b.paket);
+  const packs = pack && area ? Math.ceil(need / pack - 1e-9) : 0;
+  const total = packs * pack;
+  const preis = num(b.preis);
+  const cost = preis ? total * preis : 0;
+  const daemm = b.daemm && area ? Math.ceil(area * 1.05) : 0;
+  const autoWall = b.rects.length === 1 && rects.length === 1 ? 2 * (num(rects[0].l) + num(rects[0].b)) : 0;
+  const wall = String(b.wall).trim() ? num(b.wall) : autoWall;
+  const tueren = Math.max(0, Math.round(parseFloat(String(b.tueren).replace(',', '.')) || 0));
+  const leisteM = Math.max(0, wall - tueren * .9) * 1.1;
+  const leistenStk = leisteM ? Math.ceil(leisteM / 2.4) : 0;
+  return { area, v, need, pack, packs, total, cost, daemm, autoWall, leistenStk };
+}
+function bodenResult(r) {
+  if (!r.area) return '<p class="muted">Gib Länge und Breite ein, dann rechnet die App mit.</p>';
+  return `<div class="res-top"><span class="big">${r.packs || '–'}</span><span>${r.packs === 1 ? 'Paket' : 'Pakete'} Bodenbelag</span></div>
+    <dl>
+      <dt>Fläche</dt><dd>${fmtN(r.area)} m²</dd>
+      <dt>Mit ${Math.round(r.v * 100)} % Verschnitt</dt><dd>${fmtN(r.need)} m²</dd>
+      ${r.packs ? `<dt>Du kaufst</dt><dd>${fmtN(r.total)} m²</dd>` : ''}
+      ${r.cost ? `<dt>Belag ungefähr</dt><dd>${fmtEuro(r.cost)}</dd>` : ''}
+      ${r.daemm ? `<dt>Trittschalldämmung</dt><dd>${r.daemm} m²</dd>` : ''}
+      ${r.leistenStk ? `<dt>Sockelleisten à 2,4 m</dt><dd>${r.leistenStk} Stück</dd>` : ''}
+    </dl>`;
+}
+function bodenInput(t) {
+  const b = UI.boden;
+  if (!b) return;
+  let m;
+  if ((m = t.id.match(/^b([lb])-(\d+)$/))) { const x = b.rects[+m[2]]; if (x) x[m[1] === 'l' ? 'l' : 'b'] = t.value; }
+  else if (t.id === 'bPaket') b.paket = t.value;
+  else if (t.id === 'bPreis') b.preis = t.value;
+  else if (t.id === 'bWall') b.wall = t.value;
+  else if (t.id === 'bTuer') b.tueren = t.value;
+  else if (t.id === 'bDaemm') b.daemm = t.checked;
+  else if (t.name === 'art') b.art = t.value;
+  else if (t.dataset.extra) b.extras[t.dataset.extra] = t.checked;
+  else if (t.id === 'bNew') b.newName = t.value;
+  else if (t.id === 'bTarget') { b.target = t.value; const n = $('#bNew'); if (n) n.hidden = t.value !== '__new'; return; }
+  else return;
+  const r = calcBoden(b);
+  const out = $('#bodenOut'); if (out) out.innerHTML = bodenResult(r);
+  const w = $('#bWall'); if (w) w.placeholder = r.autoWall ? 'auto: ' + fmtN(r.autoWall) : 'z. B. 12';
+}
+
+/* ---------- Aktionen ---------- */
+function ideaRef(el) {
+  const a = el.closest('[data-p]');
+  const p = a && S.photos[a.dataset.p];
+  const s = p && p.spots.find(x => x.id === a.dataset.s);
+  const idea = s && s.ideas[+a.dataset.i];
+  return { p, s, idea, i: a ? +a.dataset.i : -1 };
+}
+function topSpot() {
+  const t = topSheet();
+  if (!t || t.type !== 'spot') return {};
+  const p = S.photos[t.photoId];
+  return { p, s: getSpot(p, t.spotId) };
+}
+function startSpot(x, y) {
+  const p = S.photos[UI.photoId];
+  if (!p) return;
+  UI.draft = { id: newId(), x, y, frage: '', blick: '', ideas: [], chat: [], createdAt: now() };
+  UI.drafts.ask = '';
+  openSheet({ type: 'spot', photoId: p.id, spotId: UI.draft.id });
+  renderFoto();
+}
+function openProjectView(pr) { closeSheet(true); UI.projectId = pr.id; go('projekt'); }
+function copyText(text, onFail) {
+  try {
+    navigator.clipboard.writeText(text).then(
+      () => toast('Grok-Prompt kopiert. Lade in Grok dein Foto mit hoch und füg ihn ein.'),
+      onFail
+    );
+  } catch (e) { onFail(); }
+}
+
+const ACT = {
+  tab(el) { go(el.dataset.tab); },
+  back() { go(UI.view === 'projekt' ? 'einkauf' : 'raeume'); },
+  openPhoto(el) { UI.photoId = el.dataset.id; go('foto'); },
+  tapPhoto(el, e) {
+    const img = $('img.photo', el);
+    if (!img) return;
+    const r = img.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1)) return;
+    startSpot(+x.toFixed(4), +y.toFixed(4));
+  },
+  askRoom() { startSpot(null, null); },
+  openSpot(el) { openSheet({ type: 'spot', photoId: UI.photoId, spotId: el.dataset.id }); },
+  gotoSpot(el) { UI.photoId = el.dataset.p; go('foto'); openSheet({ type: 'spot', photoId: el.dataset.p, spotId: el.dataset.s }); },
+  closeSheet() { closeSheet(); },
+  chip(el) {
+    const t = $('#askText');
+    if (t) { t.value = el.dataset.q; UI.drafts.ask = t.value; autosize(t); }
+    $$('.chip[data-act="chip"]').forEach(c => c.setAttribute('aria-pressed', String(c === el)));
+  },
+  stopAI() { if (UI.ai) UI.ai.ctl.abort(); },
+  moreIdeas() { const { p, s } = topSpot(); if (p && s) askIdeas(p, s, s.frage); },
+  delSpot() {
+    const { p, s } = topSpot();
+    if (!p || !s) return;
+    const idx = p.spots.indexOf(s);
+    if (idx < 0) return;
+    p.spots.splice(idx, 1);
+    touchPhoto(p); closeSheet(); renderFoto();
+    toast('Frage gelöscht', { label: 'Rückgängig', run() { p.spots.splice(idx, 0, s); touchPhoto(p); softRender(); } });
+  },
+  star(el) {
+    const { p, s, idea } = ideaRef(el);
+    if (!idea) return;
+    idea.saved = !idea.saved;
+    idea.savedAt = idea.saved ? now() : 0;
+    touchPhoto(p);
+    if (UI.view === 'ideen' && !topSheet()) {
+      renderIdeen();
+      if (!idea.saved) toast('Nicht mehr gemerkt', { label: 'Rückgängig', run() { idea.saved = true; idea.savedAt = now(); touchPhoto(p); renderIdeen(); } });
+    } else {
+      updateSpotOut(p, s);
+      if (UI.view === 'foto') renderFoto();
+      if (idea.saved) toast('Gemerkt. Du findest die Idee unter „Ideen“.');
+    }
+  },
+  matToList(el) { const { p, s, i } = ideaRef(el); if (p && s) openSheet({ type: 'pick', photoId: p.id, spotId: s.id, i }); },
+  grok(el) {
+    const { p, idea } = ideaRef(el);
+    if (!idea) return;
+    const text = grokPrompt(p, idea);
+    copyText(text, () => openSheet({ type: 'copy', text }));
+  },
+  copyAgain() {
+    const t = $('#copyText');
+    if (!t) return;
+    t.focus(); t.select();
+    try { navigator.clipboard.writeText(t.value).then(() => toast('Kopiert.'), () => toast('Der Text ist markiert. Tipp lange darauf und wähl „Kopieren“.')); }
+    catch (e) { toast('Der Text ist markiert. Tipp lange darauf und wähl „Kopieren“.'); }
+  },
+  editPhoto() { const p = S.photos[UI.photoId]; if (!p) return; UI.roomChoice = p.raum; openSheet({ type: 'editPhoto', photoId: p.id }); },
+  pickRoom(el) {
+    UI.roomChoice = el.dataset.r;
+    $$('.chip[data-act="pickRoom"]').forEach(c => c.setAttribute('aria-pressed', String(c === el)));
+    const c = $('#roomCustom'); if (c) c.value = '';
+  },
+  delPhoto() {
+    const p = S.photos[UI.photoId];
+    if (!p) return;
+    delete S.photos[p.id];
+    persist('p-' + p.id);
+    closeSheet(true);
+    go('raeume');
+    const timer = setTimeout(() => {
+      if (p.asset && Caps.assets) Caps.assets.delete(p.asset).catch(() => {});
+      if (p.local) idb.del(p.id);
+    }, 9000);
+    toast('Foto gelöscht', { label: 'Rückgängig', run() { clearTimeout(timer); S.photos[p.id] = p; touchPhoto(p); softRender(); } });
+  },
+  shop(el) { UI.shop = el.dataset.m; renderEinkauf(); },
+  tpl(el) { const pr = newProject(el.dataset.name, el.dataset.raum); touchListen(); UI.projectId = pr.id; go('projekt'); },
+  openProject(el) { UI.projectId = el.dataset.id; go('projekt'); },
+  toggleItem(el) {
+    const li = el.closest('[data-pr]'), pr = proj(li.dataset.pr), it = pr && pr.items.find(x => x.id === li.dataset.id);
+    if (!it) return;
+    it.done = !it.done;
+    touchListen(); refreshItems(pr);
+    if (it.done && UI.view === 'einkauf') toast('Gekauft: ' + it.t, { label: 'Rückgängig', run() { it.done = false; touchListen(); refreshItems(pr); } });
+  },
+  delItem(el) {
+    const li = el.closest('[data-pr]'), pr = proj(li.dataset.pr);
+    if (!pr) return;
+    const idx = pr.items.findIndex(x => x.id === li.dataset.id);
+    if (idx < 0) return;
+    const [it] = pr.items.splice(idx, 1);
+    touchListen(); refreshItems(pr);
+    toast('Gelöscht: ' + it.t, { label: 'Rückgängig', run() { pr.items.splice(idx, 0, it); touchListen(); refreshItems(pr); } });
+  },
+  projRaum(el) {
+    const pr = proj(UI.projectId);
+    if (!pr) return;
+    pr.raum = pr.raum === el.dataset.r ? '' : el.dataset.r;
+    touchListen();
+    $$('.chip[data-act="projRaum"]').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.r === pr.raum)));
+  },
+  delProject() {
+    const pr = proj(UI.projectId);
+    if (!pr) return;
+    const idx = S.listen.projects.indexOf(pr);
+    S.listen.projects.splice(idx, 1);
+    touchListen(); go('einkauf');
+    toast('Projekt gelöscht', { label: 'Rückgängig', run() { S.listen.projects.splice(idx, 0, pr); touchListen(); softRender(); } });
+  },
+  openBoden(el) {
+    UI.boden = freshBoden(UI.view === 'projekt' ? UI.projectId : '', el.dataset.raum || '');
+    openSheet({ type: 'boden' });
+  },
+  addRect() { UI.boden.rects.push({ l: '', b: '' }); renderSheet(); const k = UI.boden.rects.length - 1; const f = $('#bl-' + k); if (f) f.focus(); },
+  delRect(el) { UI.boden.rects.splice(+el.dataset.k, 1); renderSheet(); },
+  toastAct() { const a = Toast.action; hideToast(); if (a) a.run(); }
+};
+
+const FORMS = {
+  ask() {
+    const { p, s } = topSpot();
+    if (!p || !s) return;
+    const q = ($('#askText').value || '').trim() || 'Was könnte ich hier machen?';
+    UI.drafts.ask = '';
+    askIdeas(p, s, q);
+  },
+  follow() {
+    const { p, s } = topSpot();
+    const t = $('#followText');
+    const q = t ? t.value.trim() : '';
+    if (!p || !s || !q || UI.ai) return;
+    askFollow(p, s, q);
+  },
+  newPhoto() { saveNewPhoto(); },
+  editPhoto() {
+    const p = S.photos[UI.photoId];
+    if (!p) return;
+    p.raum = (UI.roomChoice || '').trim() || p.raum;
+    touchPhoto(p); closeSheet(); render();
+  },
+  pick(f) {
+    const { photoId, spotId, i } = topSheet();
+    const p = S.photos[photoId], s = getSpot(p, spotId), idea = s && s.ideas[i];
+    if (!idea) return;
+    const chosen = $$('input[name="mat"]:checked', f).map(c => idea.material[+c.value]).filter(Boolean);
+    if (!chosen.length) { toast('Wähl mindestens eine Sache aus.'); return; }
+    const target = (f.querySelector('input[name="proj"]:checked') || {}).value || '__new';
+    const pr = target === '__new' ? newProject(($('#pickNew').value || '').trim() || p.raum + ' – ' + idea.titel, p.raum) : proj(target);
+    if (!pr) return;
+    chosen.forEach(t => pr.items.push(newItem(t)));
+    touchListen(); closeSheet();
+    toast(plural(chosen.length, 'Sache', 'Sachen') + ' auf „' + pr.name + '“', { label: 'Ansehen', run() { openProjectView(pr); } });
+  },
+  newProject() {
+    const inp = $('#npName');
+    const name = (inp.value || '').trim();
+    if (!name) { inp.focus(); return; }
+    const raum = RAEUME.find(r => name.toLowerCase().includes(r.toLowerCase())) || '';
+    const pr = newProject(name, raum);
+    touchListen(); UI.projectId = pr.id; go('projekt');
+  },
+  addItem() {
+    const inp = $('#addItem'), pr = proj(UI.projectId);
+    if (!inp || !pr) return;
+    const lines = inp.value.split(/[\n;]+/).map(x => x.trim()).filter(Boolean);
+    if (!lines.length) return;
+    lines.forEach(t => pr.items.push(newItem(t)));
+    inp.value = '';
+    touchListen(); refreshItems(pr);
+  },
+  boden() {
+    const b = UI.boden, r = calcBoden(b);
+    if (!r.area) { toast('Gib zuerst Länge und Breite ein.'); return; }
+    const pr = b.target === '__new' ? newProject((b.newName || '').trim() || 'Boden', (b.newName || '').replace(/^Boden\s*/, '').trim()) : proj(b.target);
+    if (!pr) return;
+    const items = [];
+    if (r.packs) items.push(`Bodenbelag: ${r.packs} ${r.packs === 1 ? 'Paket' : 'Pakete'} à ${fmtN(r.pack)} m² (${fmtN(r.total)} m²)`);
+    else items.push(`Bodenbelag: ${fmtN(r.need)} m² inkl. Verschnitt`);
+    if (r.daemm) items.push(`Trittschalldämmung: ${r.daemm} m²`);
+    if (r.leistenStk) items.push(`Sockelleisten: ${r.leistenStk} Stück à 2,4 m`);
+    EXTRAS.forEach(([k, l]) => { if (b.extras[k]) items.push(l); });
+    items.forEach(t => pr.items.push(newItem(t)));
+    const art = (ARTEN.find(a => a[0] === b.art) || ARTEN[1])[1];
+    const line = `Bodenrechner (${fmtDate(now())}): ${fmtN(r.area)} m² Fläche, ${art.toLowerCase()} verlegt, ${Math.round(r.v * 100)} % Verschnitt → ${r.packs ? r.packs + ' Pakete à ' + fmtN(r.pack) + ' m²' : fmtN(r.need) + ' m²'}${r.cost ? ', ca. ' + fmtEuro(r.cost) : ''}.`;
+    pr.notiz = pr.notiz ? pr.notiz.replace(/\s+$/, '') + '\n' + line : line;
+    touchListen(); closeSheet();
+    if (UI.view === 'projekt' && UI.projectId === pr.id) renderProjekt(); else softRender();
+    toast(plural(items.length, 'Sache', 'Sachen') + ' auf „' + pr.name + '“', { label: 'Ansehen', run() { openProjectView(pr); } });
+  }
+};
+
+async function onFile(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  toast('Foto wird vorbereitet …');
+  try {
+    const r = await processFile(file);
+    if (UI.pending && UI.pending.url) URL.revokeObjectURL(UI.pending.url);
+    r.url = URL.createObjectURL(r.blob);
+    UI.pending = r; UI.roomChoice = ''; UI.saving = false;
+    hideToast();
+    openSheet({ type: 'newPhoto' });
+  } catch (e) {
+    toast('Das Foto lässt sich nicht öffnen. Versuch es mit einem anderen.');
+  }
+}
+async function saveNewPhoto() {
+  const f = UI.pending;
+  if (!f || UI.saving) return;
+  UI.saving = true; renderSheet();
+  const id = newId();
+  const p = normPhoto({ kind: 'foto', id, raum: (UI.roomChoice || '').trim() || 'Sonstiges', thumb: f.thumb, w: f.w, h: f.h, asset: null, local: false, spots: [], createdAt: now(), updatedAt: now() });
+  blobs.set(id, f.blob);
+  const A = await Promise.race([Caps.assetsP, sleep(5000).then(() => null)]);
+  if (A) { try { const r = await A.upload(f.blob, { type: 'image/jpeg' }); p.asset = r.id; } catch (e) { p.asset = null; } }
+  if (!p.asset) {
+    p.local = true;
+    await idb.set(id, f.blob);
+    if (Sync.col) toast('Das Foto liegt nur auf diesem Gerät. Fragen und Ideen werden trotzdem im Konto gesichert.');
+  }
+  S.photos[id] = p;
+  touchPhoto(p);
+  URL.revokeObjectURL(f.url);
+  UI.pending = null; UI.saving = false;
+  closeSheet(true);
+  UI.photoId = id;
+  go('foto');
+}
+
+/* ---------- Toast ---------- */
+const Toast = { timer: 0, action: null };
+function toast(msg, action) {
+  const t = $('#toast');
+  Toast.action = action || null;
+  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button data-act="toastAct">${esc(action.label)}</button>` : ''}`;
+  t.hidden = false;
+  clearTimeout(Toast.timer);
+  Toast.timer = setTimeout(hideToast, action ? 7000 : 4000);
+}
+function hideToast() { $('#toast').hidden = true; Toast.action = null; }
+
+function autosize(t) {
+  if (!t || t.readOnly) return;
+  if (t.id !== 'followText' && t.id !== 'askText' && t.id !== 'pNotiz') return;
+  t.style.height = 'auto';
+  t.style.height = Math.min(t.scrollHeight + 2, t.id === 'pNotiz' ? 520 : 180) + 'px';
+}
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  const fn = ACT[el.dataset.act];
+  if (fn) fn(el, e);
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const fn = FORMS[e.target.dataset.form];
+  if (fn) fn(e.target);
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'inCam' || t.id === 'inLib') { onFile(t); return; }
+  if (topSheet() && topSheet().type === 'boden') bodenInput(t);
+});
+let noteTimer = 0;
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.tagName === 'TEXTAREA') autosize(t);
+  if (t.id === 'askText') { UI.drafts.ask = t.value; $$('.chip[data-act="chip"]').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.q === t.value))); }
+  else if (t.id === 'followText') { const { s } = topSpot(); if (s) UI.drafts['f-' + s.id] = t.value; }
+  else if (t.id === 'roomCustom') { UI.roomChoice = t.value; $$('.chip[data-act="pickRoom"]').forEach(c => c.setAttribute('aria-pressed', 'false')); }
+  else if (t.id === 'pNotiz' || t.id === 'pName') {
+    const pr = proj(UI.projectId);
+    if (!pr) return;
+    if (t.id === 'pNotiz') pr.notiz = t.value.slice(0, 20000); else pr.name = t.value.slice(0, 80);
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => { touchListen(); if (t.id === 'pName') { const h = $('.h-title'); if (h) h.textContent = pr.name; } }, 400);
+  }
+  else if (topSheet() && topSheet().type === 'boden') bodenInput(t);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && topSheet()) { closeSheet(); return; }
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'followText' && window.matchMedia('(hover: hover)').matches) {
+    e.preventDefault();
+    e.target.form.requestSubmit ? e.target.form.requestSubmit() : FORMS.follow();
+  }
+});
+document.addEventListener('error', e => {
+  const t = e.target;
+  if (t && t.tagName === 'IMG' && t.dataset.full) {
+    const p = S.photos[t.dataset.full];
+    if (p && p.thumb && t.src !== p.thumb) t.src = p.thumb;
+  }
+}, true);
+window.addEventListener('hashchange', () => {
+  const v = location.hash.slice(1);
+  if (['raeume', 'ideen', 'einkauf'].includes(v) && v !== UI.view) { UI.view = v; render(); }
+});
+
+/* ---------- Start ---------- */
+const startHash = location.hash.slice(1);
+if (['raeume', 'ideen', 'einkauf'].includes(startHash)) UI.view = startHash;
+render();
+connect();
+setTimeout(() => { if (AI.state === 'pending') { AI.state = 'none'; refreshAI(); } }, 12000);
+})();
+</script>
