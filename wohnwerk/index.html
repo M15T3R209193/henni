@@ -157,8 +157,17 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--tanne); width:
 .steps span { color: var(--ink-2); font-size: .93rem; }
 
 /* Foto */
-.stage { position: relative; width: fit-content; max-width: 100%; margin: 6px auto 0; cursor: crosshair; touch-action: manipulation; }
-.stage img { display: block; max-width: 100%; max-height: 66vh; width: auto; height: auto; border-radius: 14px; background: var(--surface-2); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; box-shadow: var(--shadow-sm); }
+.stage { position: relative; width: fit-content; max-width: 100%; margin: 6px auto 0; }
+.photo-hit { display: block; max-width: 100%; padding: 0; margin: 0; border: 0; background: none; border-radius: 14px; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.stage img { display: block; max-width: 100%; max-height: 66vh; width: auto; height: auto; border-radius: 14px; background: var(--surface-2); pointer-events: none; box-shadow: var(--shadow-sm); }
+.tap-hint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 99px; background: var(--toast-bg); color: var(--toast-fg); font-size: .88rem; font-weight: 600; white-space: nowrap; pointer-events: none; box-shadow: var(--shadow); max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; }
+.ask-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; margin: 14px 0 8px; }
+.ask-bar textarea { resize: none; max-height: 140px; }
+.ai-line { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin: 0 0 24px; }
+.ai-chip { display: inline-flex; align-items: center; gap: 7px; font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.ai-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.ai-chip[data-state="ready"] i { background: var(--good); }
+.ai-chip[data-state="none"] i { background: var(--warn); }
 .pin {
   position: absolute; transform: translate(-50%, -50%); width: 34px; height: 34px; padding: 0; border-radius: 50%;
   border: 0; background: var(--band); color: var(--band-ink); font-weight: 800; font-size: .9rem; display: grid; place-items: center;
@@ -888,6 +897,16 @@ function aiNoteText() {
   if (!AI.images) return 'Fotos kann die KI in dieser Ansicht nicht sehen. Sie antwortet dann nur nach Raum und Frage.';
   return '';
 }
+function aiChip() {
+  if (AI.state === 'denied') return '<button class="btn small" data-act="allowAI">KI erlauben</button>';
+  const t = { pending: 'KI verbindet …', ready: AI.images ? 'KI bereit' : 'KI bereit, sieht aber keine Fotos', none: 'KI hier nicht verfügbar' }[AI.state];
+  return `<span class="ai-chip" data-state="${AI.state}"><i></i>${t}</span>`;
+}
+function noteHTML() {
+  const note = aiNoteText();
+  if (!note) return '';
+  return `<p class="note">${esc(note)}</p>${AI.state === 'denied' ? '<button type="button" class="btn small" data-act="allowAI" style="margin-bottom:12px">KI erlauben</button>' : ''}`;
+}
 const isFloor = t => /boden|laminat|vinyl|parkett|fliese|teppich|dielen/i.test(t || '');
 
 /* ---------- Ansichten ---------- */
@@ -968,8 +987,10 @@ function renderFoto() {
   const draft = UI.draft && top && top.type === 'spot' && top.spotId === UI.draft.id ? UI.draft : null;
   const pins = p.spots.map((s, i) => s.x == null ? '' : `<button class="pin" style="left:${(s.x * 100).toFixed(2)}%;top:${(s.y * 100).toFixed(2)}%" data-act="openSpot" data-id="${esc(s.id)}" aria-label="Stelle ${i + 1}: ${esc(s.frage)}">${i + 1}</button>`).join('');
   const dpin = draft && draft.x != null ? `<span class="pin draft" style="left:${(draft.x * 100).toFixed(2)}%;top:${(draft.y * 100).toFixed(2)}%" aria-hidden="true">${p.spots.length + 1}</span>` : '';
-  let h = `<div class="stage" data-act="tapPhoto"><img class="photo" data-full="${esc(p.id)}" data-thumb="1" src="${esc(fullUrl(p))}" alt="Foto ${esc(p.raum)}" draggable="false">${pins}${dpin}</div>
-    <div class="stage-bar"><p class="hint">${ic('target')}Tippe auf eine Stelle im Foto.</p><button class="btn small" data-act="askRoom">Ganzes Zimmer fragen</button></div>
+  const hint = !p.spots.length && !draft ? `<span class="tap-hint">${ic('target')}Tippe auf die Stelle, um die es geht</span>` : '';
+  let h = `<div class="stage"><button type="button" class="photo-hit" data-act="tapPhoto" aria-label="Foto ${esc(p.raum)}: tippe auf eine Stelle, um dazu zu fragen"><img class="photo" data-full="${esc(p.id)}" src="${esc(fullUrl(p))}" alt="" draggable="false"></button>${pins}${dpin}${hint}</div>
+    <form class="ask-bar" data-form="askRoom"><label class="vh" for="roomQ">Frage an die KI zum ganzen Raum</label><textarea id="roomQ" rows="1" placeholder="Oder frag die KI zum ganzen Raum …">${esc(UI.drafts.room || '')}</textarea><button class="send" type="submit" aria-label="Fragen" ${AI.state !== 'ready' || UI.ai ? 'disabled' : ''}>${ic('up')}</button></form>
+    <div class="ai-line"><p class="hint">${ic('target')}Tipp aufs Foto, um eine Stelle zu markieren.</p><span id="aiChip">${aiChip()}</span></div>
     <section><h2 class="h2">Deine Fragen${p.spots.length ? ` <span class="count">${p.spots.length}</span>` : ''}</h2>`;
   if (!p.spots.length) h += `<p class="muted">Noch keine. Tipp zum Beispiel auf den Boden und wähl „Boden neu verlegen“.</p>`;
   else h += `<div class="spot-list">${p.spots.map((s, i) => {
@@ -1108,7 +1129,12 @@ function renderSheet(anim) {
   wrap.hidden = true;
   document.body.classList.remove('locked');
 }
-function refreshAI() { const t = topSheet(); if (t && t.type === 'spot') renderSheet(); }
+function refreshAI() {
+  const t = topSheet();
+  if (t && t.type === 'spot') renderSheet();
+  const c = $('#aiChip'); if (c) c.innerHTML = aiChip();
+  const b = $('.ask-bar .send'); if (b) b.disabled = AI.state !== 'ready' || !!UI.ai;
+}
 function sheetHead(title, sub, extra = '') {
   return `<div class="sh-head ${extra ? '' : 'plain'}">${extra}<div><h2 class="sh-title">${esc(title)}</h2>${sub ? `<p class="sh-sub">${esc(sub)}</p>` : ''}</div><button class="x" data-act="closeSheet" aria-label="Schließen">${ic('x')}</button></div>`;
 }
@@ -1150,22 +1176,21 @@ const SHEETS = {
     const isNew = !p.spots.includes(s);
     const title = s.x == null ? 'Das ganze Zimmer' : (isNew ? 'Diese Stelle' : 'Stelle ' + spotNo(p, s));
     const head = sheetHead(title, p.raum, zoomBox(p, s));
-    const note = aiNoteText();
     if (!s.frage) {
       return head + `<form class="ask" data-form="ask">
-        <div class="eyebrow">Schnell fragen</div>
-        <div class="chips">${FRAGEN.map(([l, q]) => `<button type="button" class="chip" data-act="chip" data-q="${esc(q)}" aria-pressed="${UI.drafts.ask === q}">${esc(l)}</button>`).join('')}</div>
-        <label class="lbl" for="askText">Oder frag selbst</label>
-        <textarea id="askText" rows="3" placeholder="Was könnte ich hier machen?">${esc(UI.drafts.ask || '')}</textarea>
-        ${note ? `<p class="note">${esc(note)}</p>` : ''}
+        <div class="eyebrow">Tipp auf eine Frage, die KI antwortet sofort</div>
+        <div class="chips">${FRAGEN.map(([l, q]) => `<button type="button" class="chip" data-act="chip" data-q="${esc(q)}">${esc(l)}</button>`).join('')}</div>
+        <label class="lbl" for="askText">Oder schreib deine eigene Frage</label>
+        <textarea id="askText" rows="3" placeholder="z. B. Passt hier ein schmales Regal hin?">${esc(UI.drafts.ask || '')}</textarea>
+        ${noteHTML()}
         ${UI.ai ? '<p class="note">Die KI antwortet gerade noch auf eine andere Frage. Gleich geht es weiter.</p>' : ''}
-        <button class="btn primary wide" type="submit" ${AI.state !== 'ready' || UI.ai ? 'disabled' : ''}>Ideen holen</button>
+        <button class="btn primary wide" type="submit" ${AI.state !== 'ready' || UI.ai ? 'disabled' : ''}>KI fragen</button>
       </form>`;
     }
     const busy = !!UI.ai;
     return head + `<div id="sp-out">${spotOut(p, s)}</div>
       <div id="sp-chat">${chatHTML(s)}</div>
-      ${AI.state === 'ready' ? `<form class="follow" data-form="follow"><label class="vh" for="followText">Nachfragen</label><textarea id="followText" rows="1" placeholder="Nachfragen, z. B. Wie viel brauche ich bei 6 m²?">${esc(UI.drafts['f-' + s.id] || '')}</textarea><button class="send" type="submit" aria-label="Senden" ${busy ? 'disabled' : ''}>${ic('up')}</button></form>` : `<p class="note">${esc(note)}</p>`}
+      ${AI.state === 'ready' ? `<form class="follow" data-form="follow"><label class="vh" for="followText">Nachfragen</label><textarea id="followText" rows="1" placeholder="Nachfragen, z. B. Wie viel brauche ich bei 6 m²?">${esc(UI.drafts['f-' + s.id] || '')}</textarea><button class="send" type="submit" aria-label="Senden" ${busy ? 'disabled' : ''}>${ic('up')}</button></form>` : noteHTML()}
       <div class="sh-foot"><button class="link" data-act="moreIdeas" ${busy || AI.state !== 'ready' ? 'disabled' : ''}>Andere Ideen holen</button><button class="link danger" data-act="delSpot" ${UI.ai && UI.ai.spotId === s.id ? 'disabled' : ''}>Frage löschen</button></div>`;
   },
   newPhoto() {
@@ -1343,18 +1368,30 @@ const ACT = {
   back() { go(UI.view === 'projekt' ? 'einkauf' : 'raeume'); },
   openPhoto(el) { UI.photoId = el.dataset.id; go('foto'); },
   tapPhoto(el, e) {
-    const img = $('img.photo', el);
-    if (!img) return;
+    const img = $('img.photo', el) || el;
     const r = img.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-    if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1)) return;
+    if (!r.width || !r.height) return;
+    let x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    if (!e.detail && !e.clientX && !e.clientY) { x = .5; y = .5; }
+    x = Math.min(1, Math.max(0, x)); y = Math.min(1, Math.max(0, y));
     startSpot(+x.toFixed(4), +y.toFixed(4));
   },
-  askRoom() { startSpot(null, null); },
+  async allowAI() {
+    const fail = () => toast('Öffne oben das Menü der App und schalte unter Berechtigungen die KI ein.');
+    let perm = null;
+    try { perm = window.claude ? await window.claude.use('permissions') : null; } catch (e) { perm = null; }
+    if (!perm) { fail(); return; }
+    try { await perm.manage(); } catch (e) { fail(); return; }
+    let st = 'unavailable';
+    try { st = await perm.state('sample'); } catch (e) { /* unbekannt */ }
+    if ((st === 'granted' || st === 'prompt') && AI.fn) { AI.state = 'ready'; refreshAI(); toast('Die KI ist an. Frag einfach noch mal.'); }
+  },
   openSpot(el) { openSheet({ type: 'spot', photoId: UI.photoId, spotId: el.dataset.id }); },
   gotoSpot(el) { UI.photoId = el.dataset.p; go('foto'); openSheet({ type: 'spot', photoId: el.dataset.p, spotId: el.dataset.s }); },
   closeSheet() { closeSheet(); },
   chip(el) {
+    const { p, s } = topSpot();
+    if (p && s && AI.state === 'ready' && !UI.ai) { UI.drafts.ask = ''; askIdeas(p, s, el.dataset.q); return; }
     const t = $('#askText');
     if (t) { t.value = el.dataset.q; UI.drafts.ask = t.value; autosize(t); }
     $$('.chip[data-act="chip"]').forEach(c => c.setAttribute('aria-pressed', String(c === el)));
@@ -1476,6 +1513,19 @@ const FORMS = {
     if (!p || !s || !q || UI.ai) return;
     askFollow(p, s, q);
   },
+  askRoom() {
+    const t = $('#roomQ'), p = S.photos[UI.photoId];
+    if (!t || !p) return;
+    const q = t.value.trim();
+    if (!q) { t.focus(); return; }
+    if (AI.state !== 'ready' || UI.ai) return;
+    t.blur();
+    UI.drafts.room = '';
+    const s = { id: newId(), x: null, y: null, frage: '', blick: '', ideas: [], chat: [], createdAt: now() };
+    UI.draft = s;
+    openSheet({ type: 'spot', photoId: p.id, spotId: s.id });
+    askIdeas(p, s, q);
+  },
   newPhoto() { saveNewPhoto(); },
   editPhoto() {
     const p = S.photos[UI.photoId];
@@ -1558,7 +1608,12 @@ async function saveNewPhoto() {
   const p = normPhoto({ kind: 'foto', id, raum: (UI.roomChoice || '').trim() || 'Sonstiges', thumb: f.thumb, w: f.w, h: f.h, asset: null, local: false, spots: [], createdAt: now(), updatedAt: now() });
   blobs.set(id, f.blob);
   const A = await Promise.race([Caps.assetsP, sleep(5000).then(() => null)]);
-  if (A) { try { const r = await A.upload(f.blob, { type: 'image/jpeg' }); p.asset = r.id; } catch (e) { p.asset = null; } }
+  if (A) {
+    try {
+      const r = await Promise.race([A.upload(f.blob, { type: 'image/jpeg' }), sleep(25000).then(() => { throw { code: 'timeout' }; })]);
+      p.asset = r.id;
+    } catch (e) { p.asset = null; }
+  }
   if (!p.asset) {
     p.local = true;
     await idb.set(id, f.blob);
@@ -1587,7 +1642,7 @@ function hideToast() { $('#toast').hidden = true; Toast.action = null; }
 
 function autosize(t) {
   if (!t || t.readOnly) return;
-  if (t.id !== 'followText' && t.id !== 'askText' && t.id !== 'pNotiz') return;
+  if (!/^(followText|askText|pNotiz|roomQ)$/.test(t.id)) return;
   t.style.height = 'auto';
   t.style.height = Math.min(t.scrollHeight + 2, t.id === 'pNotiz' ? 520 : 180) + 'px';
 }
@@ -1615,6 +1670,7 @@ document.addEventListener('input', e => {
   if (t.tagName === 'TEXTAREA') autosize(t);
   if (t.id === 'askText') { UI.drafts.ask = t.value; $$('.chip[data-act="chip"]').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.q === t.value))); }
   else if (t.id === 'followText') { const { s } = topSpot(); if (s) UI.drafts['f-' + s.id] = t.value; }
+  else if (t.id === 'roomQ') UI.drafts.room = t.value;
   else if (t.id === 'roomCustom') { UI.roomChoice = t.value; $$('.chip[data-act="pickRoom"]').forEach(c => c.setAttribute('aria-pressed', 'false')); }
   else if (t.id === 'pNotiz' || t.id === 'pName') {
     const pr = proj(UI.projectId);
@@ -1627,9 +1683,10 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && topSheet()) { closeSheet(); return; }
-  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.target.id === 'followText' && window.matchMedia('(hover: hover)').matches) {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && (e.target.id === 'followText' || e.target.id === 'roomQ') && window.matchMedia('(hover: hover)').matches) {
     e.preventDefault();
-    e.target.form.requestSubmit ? e.target.form.requestSubmit() : FORMS.follow();
+    if (e.target.form.requestSubmit) e.target.form.requestSubmit();
+    else (e.target.id === 'roomQ' ? FORMS.askRoom : FORMS.follow)();
   }
 });
 document.addEventListener('error', e => {
