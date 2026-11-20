@@ -33,8 +33,13 @@ floating teal HUD data lines. Dramatic rim lighting, high contrast, clean, no te
 | Rücken (Latissimus) | `ruecken` | hinten |
 | Bizeps | `bizeps` | vorne, leicht seitlich |
 | Trizeps | `trizeps` | hinten, leicht seitlich |
+| Hintere Schulter | `schulter` | hinten, Nahaufnahme einer Schulter |
+| Beine (Quadrizeps) | `beine` | vorne, Nahaufnahme Oberschenkel |
+| Waden | `waden` | hinten, Nahaufnahme Unterschenkel |
 
-Mögliche Ergänzungen: Schultern (`shoulders / deltoids`, vorne), Beine vorne (`quadriceps`), Beinbeuger (`hamstrings`, hinten), Po (`glutes`, hinten), Waden (`calves`, hinten), Bauch (`abdominal muscles`, vorne), Nacken (`trapezius`, hinten).
+Ab den Bildern für Schulter, Beine und Waden ist auch eine engere Nahaufnahme ohne türkise HUD-Linien in Ordnung. Nur das Bokeh bleibt im Hintergrund.
+
+Mögliche Ergänzungen: vordere/seitliche Schulter (`front and side deltoids`, vorne), Beinbeuger (`hamstrings`, hinten), Po (`glutes`, hinten), Bauch (`abdominal muscles`, vorne), Nacken (`trapezius`, hinten).
 
 ## Einbau ins Artefakt
 
