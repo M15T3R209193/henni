@@ -1,0 +1,62 @@
+{
+  "CLAUDE.md": {
+    "mtime": 1795177928.0596037,
+    "seen": 1795178223.1981745,
+    "ast_hash": "a5ad6f6c5d57904de52f9e54843eb747",
+    "semantic_hash": "a5ad6f6c5d57904de52f9e54843eb747"
+  },
+  "charaktere/README.md": {
+    "mtime": 1795094935.963958,
+    "seen": 1795178223.1981845,
+    "ast_hash": "e51e6ff94906825cb0b29dcf1dcde782",
+    "semantic_hash": "e51e6ff94906825cb0b29dcf1dcde782"
+  },
+  "charaktere/kai/CHARAKTER.md": {
+    "mtime": 1795094935.967296,
+    "seen": 1795178223.198188,
+    "ast_hash": "6d1622ffe0a97dd063b751e604a9a502",
+    "semantic_hash": "6d1622ffe0a97dd063b751e604a9a502"
+  },
+  "tagwerk/index.html": {
+    "mtime": 1795094935.967296,
+    "seen": 1795178223.19819,
+    "ast_hash": "aae08ae8824025952fe222a7c1abdd20",
+    "semantic_hash": "aae08ae8824025952fe222a7c1abdd20"
+  },
+  "termine/index.html": {
+    "mtime": 1795094935.967296,
+    "seen": 1795178223.198192,
+    "ast_hash": "66c4583ee705d3ec4f1589a79319702d",
+    "semantic_hash": "66c4583ee705d3ec4f1589a79319702d"
+  },
+  "zentrale/index.html": {
+    "mtime": 1795094935.967296,
+    "seen": 1795178223.1981933,
+    "ast_hash": "52313ff0872be0896cfb574f24755360",
+    "semantic_hash": "52313ff0872be0896cfb574f24755360"
+  },
+  "bilder/original.jpg": {
+    "mtime": 1795094935.954091,
+    "seen": 1795178223.1981952,
+    "ast_hash": "c666ab0088986a8f62e22f3ae27a27f5",
+    "semantic_hash": "c666ab0088986a8f62e22f3ae27a27f5"
+  },
+  "bilder/variante1_clean_pro.jpg": {
+    "mtime": 1795094935.95654,
+    "seen": 1795178223.1981962,
+    "ast_hash": "94016d31054c4bd7b419219be1135a67",
+    "semantic_hash": "94016d31054c4bd7b419219be1135a67"
+  },
+  "bilder/variante2_cinematic.jpg": {
+    "mtime": 1795094935.959958,
+    "seen": 1795178223.1981976,
+    "ast_hash": "00de5bcb023e3fffc24f70982c77cbb5",
+    "semantic_hash": "00de5bcb023e3fffc24f70982c77cbb5"
+  },
+  "bilder/variante3_schwarzweiss.jpg": {
+    "mtime": 1795094935.963958,
+    "seen": 1795178223.1981986,
+    "ast_hash": "47e0c17c98e6fd7b0ead3f52abdb4f27",
+    "semantic_hash": "47e0c17c98e6fd7b0ead3f52abdb4f27"
+  }
+}
