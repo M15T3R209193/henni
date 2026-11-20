@@ -1,5 +1,9 @@
 # Hinweise für Claude
 
+## Muskelbilder fürs Split-Logbuch
+- Neue Bilder von Muskelgruppen müssen dem Look in `muskelbilder/STIL.md` folgen: dunkle Glas-Hologramm-Figur, Zielmuskel leuchtet orange-gold, dunkler Hintergrund mit türkisen HUD-Linien, 1:1.
+- Prompts dafür nach der Vorlage dort bauen. Schickt der Nutzer fertige Bilder, nach den Einbau-Schritten dort ins Artefakt übernehmen.
+
 ## Charaktere für Bilder
 - Gespeicherte Figuren liegen in `charaktere/<name>/CHARAKTER.md`. Die Übersicht steht in `charaktere/README.md`.
 - Sagt der Nutzer etwas wie „Bild mit Kai …“ oder „Szene mit <Name>“, gehe so vor:
